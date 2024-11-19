@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)  # 디버깅 로그 추가
 
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -27,6 +28,7 @@ class RegisterView(APIView):
             }, status=HTTP_200_OK)
         logger.error(f"유효성 검사 실패: {serializer.errors}")  # 유효성 검사 실패 로그 추가
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -47,6 +49,7 @@ class LoginView(APIView):
         logger.error("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.")  # 실패 로그 추가
         return Response({"error": "아이디 또는 비밀번호가 잘못되었습니다."}, status=HTTP_400_BAD_REQUEST)
 
+
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -55,3 +58,21 @@ class ProfileView(APIView):
         serializer = UserSerializer(user)
         logger.info(f"프로필 조회: {user.username}")  # 프로필 조회 로그 추가
         return Response(serializer.data)
+
+
+class NicknameCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        nickname = request.query_params.get('nickname')
+        logger.info(f"닉네임 중복 검사 요청: {nickname}")  # 디버깅 로그 추가
+        if not nickname:
+            logger.error("닉네임이 제공되지 않았습니다.")  # 오류 로그 추가
+            return Response({"error": "닉네임을 입력해주세요."}, status=HTTP_400_BAD_REQUEST)
+
+        is_available = not User.objects.filter(nickname=nickname).exists()
+        if is_available:
+            logger.info(f"닉네임 사용 가능: {nickname}")  # 사용 가능 로그
+        else:
+            logger.info(f"닉네임 사용 불가: {nickname}")  # 사용 불가 로그
+        return Response({"is_available": is_available}, status=HTTP_200_OK)
