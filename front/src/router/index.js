@@ -12,6 +12,11 @@ const routes = [
   { path: "/", name: "Home", component: HomeView },
   { path: "/about", name: "About", component: AboutView },
   { path: "/movies", name: "Movies", component: MoviesView },
+  {
+    path: "/reviews/:id",
+    name: "ReviewDetail",
+    component: () => import("@/views/ReviewDetailView.vue"),
+  },
   { path: "/movies/:id", name: "MovieDetail", component: MovieDetailView },
   { path: "/reviews", name: "Reviews", component: ReviewsView },
   { path: "/login", name: "Login", component: LoginView }, // 로그인 경로 추가
