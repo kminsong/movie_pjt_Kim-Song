@@ -46,16 +46,17 @@ class ReviewListCreate(ListCreateAPIView):
 
     def perform_create(self, serializer):
         movie_id = self.request.data.get("movie_id")
-        print(f"Received movie_id: {movie_id}")  # 디버깅 로그
+        print(f"Received movie_id: {movie_id}")
         if not movie_id:
             raise ValidationError({"movie_id": "movie_id 필드가 누락되었습니다."})
 
         try:
             movie = Movie.objects.get(tmdb_id=movie_id)
         except Movie.DoesNotExist:
-            
             raise ValidationError({"movie_id": "유효하지 않은 movie_id 입니다."})
 
+        # serializer의 validated_data에 movie 객체를 추가
+        serializer.validated_data['movie'] = movie
         serializer.save(user=self.request.user)
 
 
