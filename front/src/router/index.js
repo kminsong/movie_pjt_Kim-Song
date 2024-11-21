@@ -10,6 +10,8 @@ import ReviewsView from "@/views/ReviewsView.vue";
 import LoginView from "@/views/LoginView.vue"; // 로그인 페이지 추가
 import RegisterView from "@/views/RegisterView.vue"; // 회원가입 페이지 추가
 import ProfileView from "@/views/ProfileView.vue"; // 마이페이지 추가
+import ProfileEditView from "@/views/ProfileEditView.vue";
+
 
 const routes = [
   { path: "/", name: "Home", component: HomeView },
@@ -29,6 +31,7 @@ const routes = [
   { path: "/login", name: "Login", component: LoginView }, // 로그인 경로 추가
   { path: "/register", name: "Register", component: RegisterView }, // 회원가입 경로 추가
   { path: "/profile", name: "Profile", component: ProfileView }, // 마이페이지 경로 추가
+  { path: "/profile/edit", name: "ProfileEdit", component: ProfileEditView },
 ];
 
 const router = createRouter({

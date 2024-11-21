@@ -2,9 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 from django.contrib.auth import authenticate
 from .models import User
+from movies.models import Genre
 from .serializers import UserSerializer, RegisterSerializer
 import logging
 
@@ -52,12 +53,42 @@ class LoginView(APIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        logger.info(f"프로필 조회: {user.username}")  # 프로필 조회 로그 추가
         return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        data = request.data.copy()
+
+        # 'favorite_genres' 필드 처리
+        favorite_genres_ids = data.pop('favorite_genres', None)
+        if favorite_genres_ids is not None:
+            try:
+                genres = Genre.objects.filter(id__in=favorite_genres_ids)
+                if len(genres) != len(favorite_genres_ids):
+                    invalid_ids = set(favorite_genres_ids) - set(genres.values_list('id', flat=True))
+                    return Response(
+                        {"error": f"Invalid genre IDs provided: {list(invalid_ids)}"},
+                        status=400
+                    )
+                user.favorite_genres.set(genres)
+            except Exception as e:
+                return Response({"error": str(e)}, status=400)
+
+        serializer = UserSerializer(user, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    
+    def delete(self, request):
+        user = request.user
+        logger.info(f"회원 탈퇴 시도: {user.username}")
+        user.delete()
+        return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=HTTP_204_NO_CONTENT)
 
 
 class NicknameCheckView(APIView):

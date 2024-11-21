@@ -40,6 +40,21 @@ export const useAuthStore = defineStore("auth", {
         throw error;
       }
     },
+    async updateFavoriteGenres(favoriteGenres) {
+      try {
+        console.log("Sending favorite genres:", favoriteGenres); // 디버그 로그
+        const response = await axios.put(
+          "/accounts/profile/",
+          { favorite_genres: favoriteGenres }, // 반드시 배열 형식이어야 함
+          { headers: { Authorization: `Token ${localStorage.getItem("authToken")}` } }
+        );
+        this.user = response.data;
+        return response.data;
+      } catch (error) {
+        console.error("선호 장르 업데이트 중 오류 발생:", error.response?.data || error);
+        throw error;
+      }
+    },
     logout() {
       localStorage.removeItem("authToken");
       delete axios.defaults.headers.common.Authorization;
