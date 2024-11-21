@@ -76,3 +76,17 @@ class NicknameCheckView(APIView):
         else:
             logger.info(f"닉네임 사용 불가: {nickname}")  # 사용 불가 로그
         return Response({"is_available": is_available}, status=HTTP_200_OK)
+
+
+# ------------------------- [수정된 부분 시작] -------------------------
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        현재 로그인한 사용자의 정보를 반환합니다.
+        """
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+# ------------------------- [수정된 부분 끝] -------------------------
