@@ -11,7 +11,7 @@
         <router-link to="/reviews">Reviews</router-link>
       </li>
       <li class="navbar-item">
-        <router-link to="/about">About</router-link>
+        <router-link to="/community">Community</router-link> <!-- 수정된 부분 -->
       </li>
       <!-- 로그인 상태에 따라 조건부 렌더링 -->
       <li class="navbar-item" v-if="!authStore.isAuthenticated">
@@ -41,7 +41,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 /* 기존 스타일 유지 */
 </style>
