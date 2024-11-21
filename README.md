@@ -13,7 +13,22 @@
     | 김효성 | 1.  계정 기능, 게시판  및 댓글 추가/수정/삭제 기능, 영화추천 기능, point 제도, 디자인 |      |
     | 송경민 | 1. ERD 모델구성, 영화 및 리뷰 추가/수정/삭제, 평점, point 제도, 발표 |      |
 
-
+$ git log --name-only --since="midnight" --pretty=format:
+back/accounts/serializers.py
+back/accounts/urls.py
+back/accounts/views.py
+back/movies/migrations/0001_initial.py
+back/movies/migrations/0002_remove_movie_description_remove_movie_rating_and_more.py
+back/movies/migrations/0003_movie_adult.py
+front/package-lock.json
+front/package.json
+front/src/components/GenreSelectModal.vue
+front/src/components/Navbar.vue    
+front/src/router/index.js
+front/src/stores/authStore.js      
+front/src/views/HomeView.vue       
+front/src/views/MovieDetailView.vuefront/src/views/ProfileEditView.vuefront/src/views/ProfileView.vue    
+(venv) 
 
 
 
