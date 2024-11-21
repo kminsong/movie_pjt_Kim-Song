@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import User
 from movies.models import Genre
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -13,12 +12,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         # 새로운 사용자 생성
         return User.objects.create_user(**validated_data)
 
-
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ['id', 'name']
-
 
 class UserSerializer(serializers.ModelSerializer):
     favorite_genres = GenreSerializer(many=True, read_only=True)  # 읽기 시 직렬화

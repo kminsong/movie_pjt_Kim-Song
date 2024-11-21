@@ -62,6 +62,7 @@
         }
       },
       save() {
+        console.log("저장할 장르 ID:", this.selectedGenres); // 디버깅 로그 추가
         this.$emit("save", this.selectedGenres);
       },
     },
@@ -111,4 +112,3 @@
     margin: 10px;
   }
   </style>
-  
