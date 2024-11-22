@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Movie, Genre
 from .serializers import MovieSerializer
-from django.db.models import Q
 
 class MoviePagination(PageNumberPagination):
     """Pagination 설정"""
@@ -38,8 +37,3 @@ class MovieList(ListAPIView):
             queryset = queryset.order_by('-release_date')
 
         return queryset
-
-class MovieCreate(CreateAPIView):
-    """영화 추가"""
-    queryset = Movie.objects.all()
-    serializer_class = MovieSerializer
