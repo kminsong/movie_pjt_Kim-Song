@@ -9,7 +9,6 @@
     <div>
       <h3>장르 선택</h3>
       <div class="genres">
-        <!-- 전체 장르 박스 -->
         <button
           :class="{ selected: selectedGenres.length === 0 }"
           @click="clearGenres"
@@ -53,6 +52,34 @@
       </div>
       <p v-else>해당되는 영화가 없습니다</p>
     </div>
+
+    <!-- 페이지네이션 -->
+    <div v-if="totalPages > 1" class="pagination">
+      <button :disabled="currentPage === 1" @click="changePage(1)">처음</button>
+      <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
+        이전
+      </button>
+      <button
+        v-for="page in visiblePages"
+        :key="page"
+        :class="{ active: currentPage === page }"
+        @click="changePage(page)"
+      >
+        {{ page }}
+      </button>
+      <button
+        :disabled="currentPage === totalPages"
+        @click="changePage(currentPage + 1)"
+      >
+        다음
+      </button>
+      <button
+        :disabled="currentPage === totalPages"
+        @click="changePage(totalPages)"
+      >
+        마지막
+      </button>
+    </div>
   </div>
 </template>
 
@@ -62,21 +89,36 @@ import tmdb from "@/api/tmdb";
 export default {
   data() {
     return {
-      genres: [], // 장르 목록
-      selectedGenres: [], // 선택된 장르 (초기 상태: 전체 선택)
-      orderBy: "popularity", // 기본 정렬: 인기순
-      searchQuery: "", // 검색어
-      movies: [], // 영화 목록
+      genres: [],
+      selectedGenres: [],
+      orderBy: "popularity",
+      searchQuery: "",
+      movies: [],
+      currentPage: 1,
+      totalPages: 0,
     };
+  },
+  computed: {
+    visiblePages() {
+      const range = 4; // 현재 페이지 기준 앞뒤로 보여줄 페이지 수
+      const start = Math.max(1, this.currentPage - range);
+      const end = Math.min(this.totalPages, this.currentPage + range);
+
+      const pages = [];
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    },
   },
   created() {
     this.fetchGenres();
-    this.searchMovies(); // 컴포넌트 생성 시 전체 영화 목록 표시
+    this.searchMovies();
   },
   methods: {
     fetchGenres() {
       tmdb
-        .get("/genre/movie/list", { params: { language: "ko-KR" } }) // 한국어로 요청
+        .get("/genre/movie/list", { params: { language: "ko-KR" } })
         .then((response) => {
           this.genres = response.data.genres;
         })
@@ -92,21 +134,23 @@ export default {
       }
     },
     clearGenres() {
-      this.selectedGenres = []; // 선택된 장르 초기화
-      this.searchMovies(); // 전체 영화 다시 검색
+      this.selectedGenres = [];
+      this.searchMovies();
     },
     setOrderBy(order) {
       this.orderBy = order;
-      this.searchMovies(); // 정렬 기준 변경 시 즉시 검색
+      this.searchMovies();
     },
     searchMovies() {
       const params = {
-        language: "ko-KR", // 한국어 요청
-        sort_by: this.orderBy === "popularity"
-          ? "popularity.desc"
-          : this.orderBy === "release_date"
-          ? "release_date.desc"
-          : "vote_average.desc", // 평점순 정렬
+        language: "ko-KR",
+        sort_by:
+          this.orderBy === "popularity"
+            ? "popularity.desc"
+            : this.orderBy === "release_date"
+            ? "release_date.desc"
+            : "vote_average.desc",
+        page: this.currentPage,
       };
 
       if (this.selectedGenres.length > 0) {
@@ -122,13 +166,17 @@ export default {
       tmdb
         .get(apiEndpoint, { params })
         .then((response) => {
-          console.log("API 응답 데이터:", response.data.results); // 응답 데이터 확인
           this.movies = response.data.results || [];
+          this.totalPages = response.data.total_pages || 0;
         })
         .catch((error) => {
           console.error("영화 데이터를 가져오는 중 오류 발생:", error);
           this.movies = [];
         });
+    },
+    changePage(page) {
+      this.currentPage = page;
+      this.searchMovies();
     },
     goToDetail(movieId) {
       this.$router.push({ name: "MovieDetail", params: { id: movieId } });
@@ -157,8 +205,8 @@ export default {
 }
 
 .movie-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px;
 }
 
@@ -168,7 +216,36 @@ export default {
 }
 
 .movie-item img {
-  width: 200px;
+  width: 100%;
+  max-width: 150px;
   height: auto;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pagination button {
+  width: 40px; /* 고정된 버튼 크기 */
+  height: 40px; /* 고정된 버튼 높이 */
+  padding: 0;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+}
+
+.pagination button.active {
+  background-color: #0056b3;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 </style>
