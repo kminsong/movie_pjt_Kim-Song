@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 
-
 class Post(models.Model):
     title = models.CharField(max_length=200)  # 제목
     content = models.TextField()  # 내용
@@ -20,7 +19,6 @@ class Post(models.Model):
         else:
             self.is_hot = False
         super().save(*args, **kwargs)
-
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")  # 게시글

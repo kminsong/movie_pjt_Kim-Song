@@ -32,6 +32,11 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
+
+    'movies',
+    'reviews',
+    'community',
+    'accounts',
     'rest_framework.authtoken',
     'corsheaders',
     'movies',
@@ -47,6 +52,7 @@ INSTALLED_APPS = [
 ]
 
 # DRF Settings
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',

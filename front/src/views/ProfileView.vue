@@ -24,7 +24,7 @@
 
     <button @click="openGenreModal">선호 장르 선택</button>
     <button @click="editProfile">회원 정보 수정</button>
-    <button @click="deleteAccount">회원 탈퇴</button>
+    <button @click="confirmDeleteAccount">회원 탈퇴</button>
     <button @click="logout">로그아웃</button>
 
     <GenreSelectModal
@@ -34,6 +34,15 @@
       @save="saveSelectedGenres"
       @close="closeGenreModal"
     />
+    <div v-if="isDeleteConfirmModalOpen" class="delete-confirm-modal">
+      <div class="modal-content">
+        <p>정말 탈퇴하시겠습니까?</p>
+        <div class="modal-actions">
+          <button @click="deleteAccount">확인</button>
+          <button @click="closeDeleteConfirmModal">취소</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -49,6 +58,7 @@ export default {
     return {
       user: null,
       isGenreModalOpen: false,
+      isDeleteConfirmModalOpen: false,
       selectedGenres: [],
     };
   },
@@ -84,9 +94,6 @@ export default {
     async saveSelectedGenres() {
       try {
         const authStore = useAuthStore();
-    
-        console.log("Selected genres to save:", this.selectedGenres); // 디버그 로그
-
         const updatedUser = await authStore.updateFavoriteGenres(this.selectedGenres);
 
     // 즉시 `user.favorite_genres`를 업데이트하여 UI 반영
@@ -106,6 +113,12 @@ export default {
     editProfile() {
       this.$router.push("/profile/edit");
     },
+    confirmDeleteAccount() {
+      this.isDeleteConfirmModalOpen = true; // 탈퇴 확인 모달 열기
+    },
+    closeDeleteConfirmModal() {
+      this.isDeleteConfirmModalOpen = false; // 탈퇴 확인 모달 닫기
+    },
     async deleteAccount() {
       try {
         await axios.delete("/accounts/profile/", {
@@ -120,6 +133,8 @@ export default {
       } catch (error) {
         console.error("회원 탈퇴 중 오류 발생:", error);
         alert("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");
+      } finally {
+        this.isDeleteConfirmModalOpen = false; // 모달 닫기
       }
     },
     logout() {
@@ -144,5 +159,49 @@ export default {
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 5px 10px;
+}
+
+.delete-confirm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-actions button:first-child {
+  background-color: #d9534f;
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background-color: #5bc0de;
+  color: white;
 }
 </style>
