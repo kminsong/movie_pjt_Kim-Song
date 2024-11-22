@@ -1,23 +1,11 @@
 <template>
   <div class="community">
     <h1>커뮤니티</h1>
-    <!-- 카테고리 버튼 -->
-    <div class="categories">
-      <button
-        v-for="cat in categories"
-        :key="cat.name"
-        :class="{ active: currentCategory === cat.name }"
-        @click="goToCategory(cat.name)"
-      >
-        {{ cat.name }}
-      </button>
-    </div>
 
     <!-- 전체글, Hot, 게시글 작성하기 -->
     <div class="controls">
       <button @click="goToAllPosts" :class="{ active: isAllPosts }">전체글</button>
       <button @click="goToHotPosts" :class="{ active: isHotPosts }">Hot</button>
-      <!-- 게시글 작성하기 버튼 -->
       <button
         v-if="canWritePost"
         @click="goToPostForm"
@@ -27,14 +15,41 @@
       </button>
     </div>
 
-    <!-- 게시글 리스트 -->
-    <PostList :category="currentCategory" :isHot="isHotPosts" />
+
+    <!-- 필터 추가 -->
+    <div class="filters">
+      <label>
+        <input
+          type="radio"
+          value="latest"
+          v-model="filter"
+          @change="applyFilter"
+        /> 최신순
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="likes"
+          v-model="filter"
+          @change="applyFilter"
+        /> 좋아요순
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="comments"
+          v-model="filter"
+          @change="applyFilter"
+        /> 댓글순
+      </label>
+    </div>
+
+    <PostList :isHot="isHotPosts" :filter="filter" />
   </div>
 </template>
 
 <script>
-import { useAuthStore } from "@/stores/authStore";
-import PostList from "@/views/PostList.vue"; // 경로 수정
+import PostList from "@/views/PostList.vue";
 
 export default {
   name: "CommunityView",
@@ -43,41 +58,19 @@ export default {
   },
   data() {
     return {
-      categories: [
-        { name: "공지사항" },
-        { name: "영화토론방" },
-        { name: "영화수다방" },
-        { name: "잡담방" },
-      ],
-      currentCategory: "공지사항", // 초기 카테고리
-      isHotPosts: false, // Hot 글 보기 여부
+      isHotPosts: false,
+      filter: "latest",
     };
   },
   computed: {
-    isAuthenticated() {
-      const authStore = useAuthStore();
-      return authStore.isAuthenticated; // 로그인 여부
-    },
-    isAdmin() {
-      const authStore = useAuthStore();
-      return authStore.user?.is_superuser || false; // 관리자인지 여부
-    },
-    canWritePost() {
-      // 게시글 작성 조건
-      if (this.currentCategory === "공지사항") {
-        return this.isAuthenticated && this.isAdmin; // 공지사항은 관리자만
-      }
-      return this.isAuthenticated; // 나머지 카테고리는 로그인된 사용자
-    },
     isAllPosts() {
       return !this.isHotPosts;
     },
+    canWritePost() {
+      return true; // 로그인 여부에 따라 수정 가능
+    },
   },
   methods: {
-    goToCategory(category) {
-      this.currentCategory = category;
-      this.isHotPosts = false;
-    },
     goToAllPosts() {
       this.isHotPosts = false;
     },
@@ -85,31 +78,14 @@ export default {
       this.isHotPosts = true;
     },
     goToPostForm() {
-      this.$router.push({ name: "PostForm", query: { category: this.currentCategory } });
+      this.$router.push({ name: "PostCreate" });
     },
+    applyFilter() {},
   },
 };
 </script>
 
 <style scoped>
-.categories {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.categories button {
-  margin: 0 10px;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
-}
-
-.categories button.active {
-  background-color: #007bff;
-  color: white;
-}
-
 .controls {
   display: flex;
   justify-content: center;
@@ -126,6 +102,17 @@ export default {
 .controls button.active {
   background-color: #28a745;
   color: white;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.filters label {
+  cursor: pointer;
 }
 
 .write-button {

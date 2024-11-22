@@ -32,12 +32,17 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
+
     'movies',
     'reviews',
     'community',
     'accounts',
     'rest_framework.authtoken',
     'corsheaders',
+    'movies',
+    'reviews',
+    'community',
+    'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+# DRF Settings
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -55,7 +62,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
+
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -140,5 +151,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ALLOW_ALL_ORIGINS = True

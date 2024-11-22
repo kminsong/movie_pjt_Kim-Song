@@ -34,7 +34,6 @@
       @save="saveSelectedGenres"
       @close="closeGenreModal"
     />
-
     <div v-if="isDeleteConfirmModalOpen" class="delete-confirm-modal">
       <div class="modal-content">
         <p>정말 탈퇴하시겠습니까?</p>

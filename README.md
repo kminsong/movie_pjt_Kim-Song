@@ -14,6 +14,7 @@
     | 송경민 | 1. ERD 모델구성, 계정 기능, 영화 및 리뷰 추가/수정/삭제, 평점, point 제도, 발표 |      |
 
 
+
 11/18(월) : 큰 틀 구상, 메인페이지 틀
 11/19(화) : 메인 페이지, 계정 기능, 게시판, 영화 리뷰 등 주요 기능 구현
 11/20(수) : 부족한 부분 마저 구현 및 디자인
@@ -24,7 +25,17 @@
 11/25(월) : 최종 점검 및 버그 확인
 11/26(화) : 발표 준비
 
+11/18(월) : 큰 틀 구상, 메인페이지 틀
+11/19(화) : 메인 페이지, 계정 기능, 게시판, 영화 리뷰 등 주요 기능 구현
+11/20(수) : 부족한 부분 마저 구현 및 디자인
+11/21(목) : 디자인, 버그 수정 및 게시글 작성
+11/22(금) : 추가 기능 구현, (베이직이 미완성일 경우 베이직작성)
+11/23(토) : 버그 수정 및 디자인 수정
+11/24(일) : 서버 배포 시도
+11/25(월) : 최종 점검 및 버그 확인
+11/26(화) : 발표 준비
 
+VITE_TMDB_API_KEY=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NmIyYTk4MDI1ZTYzNWI5Y2M3OGNjNTZmNTU3NmIxMyIsIm5iZiI6MTczMTkxMjM0Ni4zMDkxODUzLCJzdWIiOiI2NzM2ZDAyYWFjOWYzYmEwODE1NTgzZTgiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.8VlzRkHhdfoOnwiRJuTUCwzgLqZnOBSh53Lpq7Kd8IM
 
 ### 2. 주제
 

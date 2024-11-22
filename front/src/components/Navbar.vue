@@ -47,7 +47,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .navbar {
   background-color: #333;
