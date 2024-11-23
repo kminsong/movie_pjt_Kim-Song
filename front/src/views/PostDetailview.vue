@@ -7,24 +7,26 @@
 
     <!-- 좋아요/싫어요 버튼 -->
     <div class="like-dislike-buttons">
-      <button
-        v-if="isAuthenticated && !isAuthor"
-        :class="{ liked: likedByUser }"
-        @click="toggleLike"
-      >
-        <i :class="likedByUser ? 'fas fa-heart' : 'far fa-heart'"></i>
-        {{ likedByUser ? "좋아요 취소" : "좋아요" }}
-      </button>
-      <button
-        v-if="isAuthenticated && !isAuthor"
-        :class="{ disliked: dislikedByUser }"
-        @click="toggleDislike"
-      >
-        <i :class="dislikedByUser ? 'fas fa-heart-broken' : 'far fa-heart-broken'"></i>
-        {{ dislikedByUser ? "싫어요 취소" : "싫어요" }}
-      </button>
-      <p v-if="isAuthor">본인이 작성한 글입니다.</p>
-      <p v-else-if="!isAuthenticated">로그인 후 좋아요/싫어요를 누를 수 있습니다.</p>
+      <p v-if="post.author_id === currentUserId">본인이 작성한 글입니다.</p>
+      <div v-else>
+        <button
+          v-if="isAuthenticated"
+          :class="{ liked: likedByUser }"
+          @click="toggleLike"
+        >
+          <i :class="likedByUser ? 'fas fa-heart' : 'far fa-heart'"></i>
+          {{ likedByUser ? "좋아요 취소" : "좋아요" }}
+        </button>
+        <button
+          v-if="isAuthenticated"
+          :class="{ disliked: dislikedByUser }"
+          @click="toggleDislike"
+        >
+          <i :class="dislikedByUser ? 'fas fa-heart-broken' : 'far fa-heart-broken'"></i>
+          {{ dislikedByUser ? "싫어요 취소" : "싫어요" }}
+        </button>
+        <p v-else>로그인 후 좋아요/싫어요를 누를 수 있습니다.</p>
+      </div>
     </div>
 
     <!-- 댓글 컴포넌트 -->
@@ -34,22 +36,27 @@
 
 <script>
 import axios from "@/api/axios";
-import CommentList from "@/views/CommentList.vue"; // views 디렉토리로 경로 수정
+import CommentList from "@/views/CommentList.vue";
 
 export default {
   components: { CommentList },
   data() {
     return {
       post: {},
-      isAuthor: false,
       isAuthenticated: false,
       likedByUser: false,
       dislikedByUser: false,
+      currentUserId: null, // 현재 사용자 ID
     };
   },
   async created() {
     const postId = this.$route.params.id;
+
     this.isAuthenticated = !!localStorage.getItem("authToken");
+    if (this.isAuthenticated) {
+      await this.fetchCurrentUser();
+    }
+
     await this.fetchPost(postId);
   },
   methods: {
@@ -59,12 +66,22 @@ export default {
           headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
         });
         this.post = response.data;
-        this.isAuthor = this.post.author_name === localStorage.getItem("username");
-        // 서버에서 `liked_by_user`와 `disliked_by_user` 상태를 가져와서 설정
+
+        // 좋아요/싫어요 상태 설정
         this.likedByUser = response.data.liked_by_user || false;
         this.dislikedByUser = response.data.disliked_by_user || false;
       } catch (error) {
         console.error("게시글 정보를 가져오는 중 오류 발생:", error);
+      }
+    },
+    async fetchCurrentUser() {
+      try {
+        const response = await axios.get("/accounts/profile/", {
+          headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+        });
+        this.currentUserId = response.data.id; // 사용자 ID 저장
+      } catch (error) {
+        console.error("현재 사용자 정보를 가져오는 중 오류 발생:", error);
       }
     },
     async toggleLike() {
@@ -72,12 +89,10 @@ export default {
         const response = await axios.post(
           `/community/posts/${this.post.id}/like/`,
           null,
-          {
-            headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
-          }
+          { headers: { Authorization: `Token ${localStorage.getItem("authToken")}` } }
         );
         this.post.likes = response.data.likes;
-        this.likedByUser = !this.likedByUser;
+        this.likedByUser = !this.likedByUser; // 좋아요 상태 반전
       } catch (error) {
         console.error("좋아요 실패:", error);
       }
@@ -87,12 +102,10 @@ export default {
         const response = await axios.post(
           `/community/posts/${this.post.id}/dislike/`,
           null,
-          {
-            headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
-          }
+          { headers: { Authorization: `Token ${localStorage.getItem("authToken")}` } }
         );
         this.post.dislikes = response.data.dislikes;
-        this.dislikedByUser = !this.dislikedByUser;
+        this.dislikedByUser = !this.dislikedByUser; // 싫어요 상태 반전
       } catch (error) {
         console.error("싫어요 실패:", error);
       }
