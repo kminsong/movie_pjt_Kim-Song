@@ -36,19 +36,34 @@ export default {
     },
     async submitComment() {
       try {
-        await axios.post(`/community/posts/${this.postId}/comments/`, {
+        console.log("Submitting comment:", {
+          post: this.postId,
           content: this.content,
-        }, {
-          headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
-        });
+        }); // 디버깅: 요청 데이터 출력
+        await axios.post(
+          `/community/posts/${this.postId}/comments/`,
+          { post: this.postId, content: this.content }, // post 필드 추가
+          {
+            headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+          }
+        );
         this.content = "";
         this.fetchComments();
       } catch (error) {
-        console.error("댓글 작성 실패:", error);
+        console.error(
+          "댓글 작성 실패:",
+          error.response ? error.response.data : error
+        );
       }
     },
     formatDate(dateString) {
-      const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
+      const options = {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      };
       return new Date(dateString).toLocaleString(undefined, options);
     },
   },

@@ -30,7 +30,7 @@
     </div>
 
     <!-- 댓글 컴포넌트 -->
-    <CommentList :postId="post.id" />
+    <CommentList v-if="post.id" :postId="post.id" />
   </div>
 </template>
 
