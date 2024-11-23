@@ -4,6 +4,11 @@
       <li v-for="comment in comments" :key="comment.id">
         <strong>{{ comment.author_name }}</strong>: {{ comment.content }}
         <span class="timestamp">{{ formatDate(comment.created_at) }}</span>
+        <!-- 본인 댓글에만 수정/삭제 버튼 표시 -->
+        <span v-if="comment.author_id === currentUserId" class="actions">
+          <button @click="editComment(comment.id)">[수정]</button>
+          <button @click="deleteComment(comment.id)">[삭제]</button>
+        </span>
       </li>
     </ul>
     <form @submit.prevent="submitComment">
@@ -21,8 +26,9 @@ export default {
   props: ["postId"],
   data() {
     return {
-      comments: [],
-      content: "",
+      comments: [], // 댓글 목록
+      content: "", // 작성 중인 댓글 내용
+      currentUserId: null, // 현재 로그인한 사용자 ID
     };
   },
   methods: {
@@ -34,26 +40,65 @@ export default {
         console.error("댓글 불러오기 실패:", error);
       }
     },
+    async fetchCurrentUser() {
+      try {
+        const response = await axios.get("/accounts/profile/", {
+          headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+        });
+        this.currentUserId = response.data.id; // 현재 사용자 ID 저장
+      } catch (error) {
+        console.error("현재 사용자 정보를 가져오는 중 오류 발생:", error);
+      }
+    },
     async submitComment() {
       try {
         console.log("Submitting comment:", {
           post: this.postId,
           content: this.content,
-        }); // 디버깅: 요청 데이터 출력
+        });
         await axios.post(
           `/community/posts/${this.postId}/comments/`,
-          { post: this.postId, content: this.content }, // post 필드 추가
+          { post: this.postId, content: this.content },
           {
             headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
           }
         );
-        this.content = "";
-        this.fetchComments();
+        this.content = ""; // 입력 필드 초기화
+        this.fetchComments(); // 댓글 목록 갱신
       } catch (error) {
         console.error(
           "댓글 작성 실패:",
           error.response ? error.response.data : error
         );
+      }
+    },
+    async editComment(commentId) {
+      const newContent = prompt("댓글 내용을 수정하세요:", this.comments.find(c => c.id === commentId).content);
+      if (newContent) {
+        try {
+          await axios.put(
+            `/community/posts/${this.postId}/comments/${commentId}/`,
+            { content: newContent },
+            {
+              headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+            }
+          );
+          this.fetchComments(); // 댓글 목록 갱신
+        } catch (error) {
+          console.error("댓글 수정 실패:", error);
+        }
+      }
+    },
+    async deleteComment(commentId) {
+      if (confirm("댓글을 삭제하시겠습니까?")) {
+        try {
+          await axios.delete(`/community/posts/${this.postId}/comments/${commentId}/`, {
+            headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+          });
+          this.fetchComments(); // 댓글 목록 갱신
+        } catch (error) {
+          console.error("댓글 삭제 실패:", error);
+        }
       }
     },
     formatDate(dateString) {
@@ -67,12 +112,12 @@ export default {
       return new Date(dateString).toLocaleString(undefined, options);
     },
   },
-  created() {
-    this.fetchComments();
+  async created() {
+    await this.fetchCurrentUser(); // 현재 로그인한 사용자 정보 가져오기
+    this.fetchComments(); // 댓글 목록 가져오기
   },
 };
 </script>
-
 
 <style scoped>
 ul {
@@ -94,5 +139,27 @@ button {
   background-color: #007bff;
   color: white;
   padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #0056b3;
+}
+.actions {
+  margin-left: 10px;
+}
+.actions button {
+  background: none;
+  color: #007bff;
+  font-size: 0.9em;
+  padding: 0;
+  margin-left: 5px;
+  border: none;
+  cursor: pointer;
+}
+.actions button:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 </style>
