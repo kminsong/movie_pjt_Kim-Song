@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Post, Comment
 
 class CommentSerializer(serializers.ModelSerializer):
-    author_name = serializers.CharField(source="author.nickrname", read_only=True)
+    author_name = serializers.CharField(source="author.nickname", read_only=True)
 
     class Meta:
         model = Comment
