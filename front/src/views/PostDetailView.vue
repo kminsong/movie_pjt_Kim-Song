@@ -1,8 +1,19 @@
 <template>
   <div>
-    <h1>{{ post.title }}</h1>
+    <h1 v-if="!editMode">{{ post.title }}</h1>
+    <div v-else>
+      <input v-model="editedPost.title" placeholder="제목을 입력하세요" />
+    </div>
+
     <p><strong>작성자:</strong> {{ post.author_name }}</p>
-    <p><strong>내용:</strong> {{ post.content }}</p>
+
+    <div v-if="!editMode">
+      <p><strong>내용:</strong> {{ post.content }}</p>
+    </div>
+    <div v-else>
+      <textarea v-model="editedPost.content" placeholder="내용을 입력하세요"></textarea>
+    </div>
+
     <p>좋아요: {{ post.likes }} | 싫어요: {{ post.dislikes }}</p>
 
     <!-- 좋아요/싫어요 버튼 -->
@@ -29,6 +40,14 @@
       </div>
     </div>
 
+    <!-- 수정/삭제 버튼 -->
+    <div v-if="post.author_id === currentUserId" class="post-actions">
+      <button v-if="!editMode" @click="enableEditMode">[수정]</button>
+      <button v-else @click="saveChanges">[저장]</button>
+      <button v-if="!editMode" @click="deletePost">[삭제]</button>
+      <button v-else @click="cancelEditMode">[취소]</button>
+    </div>
+
     <!-- 댓글 컴포넌트 -->
     <CommentList v-if="post.id" :postId="post.id" />
   </div>
@@ -43,6 +62,8 @@ export default {
   data() {
     return {
       post: {},
+      editedPost: {}, // 수정 시 사용될 데이터
+      editMode: false, // 수정 모드 상태
       isAuthenticated: false,
       likedByUser: false,
       dislikedByUser: false,
@@ -66,6 +87,7 @@ export default {
           headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
         });
         this.post = response.data;
+        this.editedPost = { ...response.data }; // 수정 시 사용할 데이터 초기화
 
         // 좋아요/싫어요 상태 설정
         this.likedByUser = response.data.liked_by_user || false;
@@ -110,6 +132,44 @@ export default {
         console.error("싫어요 실패:", error);
       }
     },
+    enableEditMode() {
+      this.editMode = true;
+    },
+    async saveChanges() {
+      try {
+        await axios.put(
+          `/community/posts/${this.post.id}/`,
+          this.editedPost,
+          {
+            headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+          }
+        );
+        this.editMode = false; // 수정 모드 종료
+        this.fetchPost(this.post.id); // 데이터 새로고침
+        alert("게시글이 수정되었습니다.");
+      } catch (error) {
+        console.error("게시글 수정 실패:", error);
+        alert("게시글 수정에 실패했습니다.");
+      }
+    },
+    cancelEditMode() {
+      this.editMode = false;
+      this.editedPost = { ...this.post }; // 수정 데이터를 초기화
+    },
+    async deletePost() {
+      if (confirm("정말로 게시글을 삭제하시겠습니까?")) {
+        try {
+          await axios.delete(`/community/posts/${this.post.id}/`, {
+            headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
+          });
+          alert("게시글이 삭제되었습니다.");
+          this.$router.push("/community"); // 삭제 후 커뮤니티 목록 페이지로 이동
+        } catch (error) {
+          console.error("게시글 삭제 실패:", error);
+          alert("게시글 삭제에 실패했습니다.");
+        }
+      }
+    },
   },
 };
 </script>
@@ -121,6 +181,10 @@ export default {
   margin: 10px 0;
 }
 
+.post-actions {
+  margin: 10px 0;
+}
+
 button {
   padding: 10px;
   border: none;
@@ -129,30 +193,15 @@ button {
   font-size: 16px;
 }
 
-button.liked {
-  background-color: #ff4d4d;
-  color: white;
-}
-
-button.liked i {
-  color: white;
-}
-
-button.disliked {
-  background-color: #4d4dff;
-  color: white;
-}
-
-button.disliked i {
-  color: white;
-}
-
 button:hover {
   opacity: 0.8;
 }
 
-button i {
-  margin-right: 5px;
-  font-size: 20px;
+textarea,
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
 }
 </style>
