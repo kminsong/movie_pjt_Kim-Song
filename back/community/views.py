@@ -2,10 +2,11 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from django.db.models import Count
+from django.db.models import Count, Q
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.exceptions import ValidationError
+
 
 
 class PostListCreateView(ListCreateAPIView):
@@ -16,6 +17,8 @@ class PostListCreateView(ListCreateAPIView):
         queryset = Post.objects.all()
         filter_type = self.request.query_params.get("filter", "latest")
         is_hot = self.request.query_params.get("is_hot", "false").lower() == "true"
+        search_query = self.request.query_params.get("search", "").strip()  # 검색어
+        search_field = self.request.query_params.get("search_field", "title")  # 검색 필드
 
         if is_hot:
             queryset = queryset.filter(is_hot=True)
@@ -28,6 +31,15 @@ class PostListCreateView(ListCreateAPIView):
             )
         else:
             queryset = queryset.order_by("-created_at")
+
+        # 검색 필드별로 필터링
+        if search_query:
+            if search_field == "title":
+                queryset = queryset.filter(title__icontains=search_query)
+            elif search_field == "author":
+                queryset = queryset.filter(author__nickname__icontains=search_query)
+            elif search_field == "content":
+                queryset = queryset.filter(content__icontains=search_query)
 
         return queryset
 
