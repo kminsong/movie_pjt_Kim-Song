@@ -1,5 +1,23 @@
 <template>
   <div class="post-list">
+    <!-- 검색 창 -->
+    <div class="search-bar">
+      <!-- 검색 조건 선택 -->
+      <select v-model="searchField">
+        <option value="title">제목</option>
+        <option value="author">작성자</option>
+        <option value="content">내용</option>
+      </select>
+      <!-- 검색 입력 -->
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="검색어를 입력하세요"
+      />
+      <!-- 검색 버튼 -->
+      <button @click="fetchPosts">검색</button>
+    </div>
+
     <div class="post-table">
       <!-- 헤더 -->
       <div class="post-header">
@@ -37,7 +55,9 @@ export default {
   props: ["isHot", "filter"],
   data() {
     return {
-      posts: [],
+      posts: [], // 게시글 리스트
+      searchQuery: "", // 검색어
+      searchField: "title", // 검색 필드 (기본값: 제목)
     };
   },
   methods: {
@@ -45,6 +65,8 @@ export default {
       try {
         const params = {
           filter: this.filter,
+          search: this.searchQuery,
+          search_field: this.searchField, // 검색 필드 추가
         };
         if (this.isHot) {
           params.is_hot = true;
@@ -93,6 +115,42 @@ export default {
 </script>
 
 <style scoped>
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* 검색 창 간격 */
+}
+
+.search-bar select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.search-bar input {
+  width: 50%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.search-bar button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #0056b3;
+}
+
 .post-table {
   margin-top: 20px;
 }
@@ -128,7 +186,7 @@ ul li .author,
 ul li .comments,
 .post-header .likes,
 ul li .likes,
-.post-header .date,
+post-header .date,
 ul li .date {
   flex: 1; /* 나머지는 작게 */
 }
