@@ -359,6 +359,7 @@ h1 {
 .movie-detail {
   min-width: 600px;
   display: flex;
+  gap: 30px;
   align-items: flex-start; /* 위쪽 정렬 */
   margin: 50px 100px;
   background: #2c2c2c;
@@ -375,7 +376,8 @@ h1 {
 /* 포스터 스타일 */
 .poster img {
   min-width: 250px;
-  width: 70%;
+  /* width: 70%; */
+  width: 250px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
@@ -385,7 +387,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 15px; /* 항목 간 간격 */
-  margin-left: -45px;
+  /* margin-left: -45px; */
 }
 
 h1 {
