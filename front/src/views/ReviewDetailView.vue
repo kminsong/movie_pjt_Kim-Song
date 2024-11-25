@@ -13,8 +13,11 @@
 
       <!-- 리뷰 정보 -->
       <div class="info">
-        <!-- 리뷰 제목 -->
-        <h1>{{ review.title }}</h1>
+        <!-- 제목 수정 필드 -->
+        <h1 v-if="isEditing">
+          <input v-model="editedTitle" placeholder="제목을 입력하세요" />
+        </h1>
+        <h1 v-else>{{ review.title }}</h1>
 
         <!-- 영화 제목 -->
         <p class="movie-title">
@@ -28,17 +31,21 @@
         <p><strong>작성자:</strong> {{ review.user_nickname }}</p>
 
         <!-- 본인이 준 별점 -->
-        <p v-if="!isEditing" class="star-rating">
+        <p class="star-rating">
           <strong>내 별점:</strong>
-          <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= review.star_rating }">
+          <span
+            v-for="n in 5"
+            :key="n"
+            class="star"
+            :class="{ filled: n <= (isEditing ? editedStarRating : review.star_rating) }"
+            @click="isEditing && updateStarRating(n)"
+          >
             ★
           </span>
         </p>
 
         <!-- 좋아요 -->
-        <p v-if="!isEditing" class="likes">
-          좋아요: {{ review.like_count }}
-        </p>
+        <p class="likes">좋아요: {{ review.like_count }}</p>
 
         <!-- 좋아요 버튼 -->
         <button
@@ -52,21 +59,31 @@
           본인이 작성한 글입니다.
         </p>
         <p v-else-if="!isAuthenticated">로그인 후 좋아요를 누를 수 있습니다.</p>
+
+        <!-- 수정/삭제 링크 -->
+        <p v-if="review.user_id === currentUserId" class="edit-delete-links">
+          <span v-if="!isEditing" @click="startEdit" class="link">[수정]</span>
+          <span v-if="!isEditing" class="spacer"></span>
+          <span v-if="!isEditing" @click="confirmDelete" class="link">[삭제]</span>
+        </p>
+
+        <!-- 저장/취소 버튼 -->
+        <div v-if="isEditing" class="edit-actions">
+          <span @click="saveChanges" class="link">[저장]</span>
+          <span class="spacer"></span>
+          <span @click="cancelEdit" class="link">[취소]</span>
+        </div>
       </div>
     </div>
 
-    <!-- 리뷰 내용 -->
+    <!-- 내용 수정 필드 -->
     <div class="review-box">
-      <h2>리뷰</h2>
-      <p>{{ review.content }}</p>
-    </div>
-
-    <!-- 수정 폼 -->
-    <div v-if="isEditing" class="edit-form">
-      <input v-model="editedTitle" placeholder="수정할 제목을 입력하세요" />
-      <textarea v-model="editedContent" placeholder="수정할 내용을 입력하세요"></textarea>
-      <button @click="saveChanges">저장</button>
-      <button @click="cancelEdit">취소</button>
+      <p v-if="!isEditing">{{ review.content }}</p>
+      <textarea
+        v-if="isEditing"
+        v-model="editedContent"
+        placeholder="내용을 입력하세요"
+      ></textarea>
     </div>
   </div>
 </template>
@@ -84,6 +101,7 @@ export default {
       isEditing: false, // 수정 중 여부
       editedTitle: "", // 수정된 제목
       editedContent: "", // 수정된 내용
+      editedStarRating: 0, // 수정 중인 별점
     };
   },
   async created() {
@@ -107,6 +125,7 @@ export default {
           },
         });
         this.review = response.data;
+        this.editedStarRating = this.review.star_rating; // 초기 별점 설정
         this.likedByUser = response.data.liked_by_user; // 서버에서 받은 liked_by_user 상태
       } catch (error) {
         console.error("리뷰 상세 정보를 가져오는 중 오류 발생:", error);
@@ -139,6 +158,7 @@ export default {
       this.isEditing = true;
       this.editedTitle = this.review.title;
       this.editedContent = this.review.content;
+      this.editedStarRating = this.review.star_rating;
     },
     cancelEdit() {
       this.isEditing = false;
@@ -150,6 +170,7 @@ export default {
           {
             title: this.editedTitle.trim(),
             content: this.editedContent.trim(),
+            star_rating: this.editedStarRating, // 수정된 별점 저장
             movie_id: this.review.movie_id, // movie_id 추가
           },
           {
@@ -158,6 +179,7 @@ export default {
         );
         this.review.title = response.data.title;
         this.review.content = response.data.content;
+        this.review.star_rating = response.data.star_rating; // 별점 업데이트
         this.isEditing = false;
         alert("수정되었습니다!");
       } catch (error) {
@@ -167,7 +189,7 @@ export default {
     },
     async confirmDelete() {
       if (!confirm("삭제하시겠습니까?")) {
-        return; // 취소를 누르면 아무것도 하지 않음
+        return;
       }
       try {
         await axios.delete(`/reviews/${this.review.id}/`, {
@@ -179,6 +201,9 @@ export default {
         console.error("리뷰 삭제 중 오류 발생:", error);
         alert("삭제에 실패했습니다.");
       }
+    },
+    updateStarRating(star) {
+      this.editedStarRating = star; // 선택된 별점 저장
     },
   },
 };
@@ -194,7 +219,7 @@ export default {
 .poster-and-info {
   display: flex;
   align-items: flex-start;
-  gap: 20px; /* 포스터와 오른쪽 정보 간의 간격 */
+  gap: 20px;
 }
 
 .poster {
@@ -210,8 +235,8 @@ export default {
 }
 
 .review-box {
-  min-height: 7cm; /* 최소 높이 */
-  width: 500px; /* 고정된 가로 길이 */
+  min-height: 7cm;
+  width: 500px;
   padding: 15px;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -221,83 +246,44 @@ export default {
   margin-top: 20px;
 }
 
-.review-box h2 {
-  margin: 0;
-  margin-bottom: 10px;
-  font-size: 18px;
-  color: #333;
-}
-
 .review-box p {
   margin: 0;
   font-size: 16px;
-  color: #555;
-}
-
-.info {
-  display: flex;
-  flex-direction: column;
-  max-width: 300px; /* 오른쪽 정보의 최대 가로길이 */
-  flex: 1; /* 남은 공간을 차지 */
-}
-
-button {
-  padding: 5px 10px;
-  border: none;
-  color: white;
-  background-color: #007bff;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-button.liked {
-  background-color: #ff4d4d;
-}
-
-button.liked:hover {
-  background-color: #ff1a1a;
-}
-
-textarea,
-input {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  color: #333;
 }
 
 textarea {
-  height: 80px;
+  width: 100%;
+  height: 200px; /* 수정 시 높이 증가 */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: none;
 }
 
-.movie-title {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.likes {
+input {
+  height: 40px; /* 제목 수정 칸 높이 고정 */
+  line-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
   font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
 }
 
 .star-rating {
   font-size: 18px;
   margin-top: 10px;
   color: #f39c12;
+  cursor: pointer;
 }
 
 .star {
   font-size: 24px;
-  color: #ddd; /* 기본 회색 */
+  color: #ddd;
 }
 
 .star.filled {
-  color: #f39c12; /* 채워진 별의 색상 */
+  color: #f39c12;
 }
 
 .edit-delete-links {
