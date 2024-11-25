@@ -1,6 +1,17 @@
 <template>
   <div>
+    <!-- 영화 포스터 -->
+    <div v-if="review.movie_poster">
+      <img
+        :src="'https://image.tmdb.org/t/p/w500' + review.movie_poster"
+        alt="영화 포스터"
+        class="movie-poster"
+      />
+    </div>
+
+    <!-- 리뷰 제목 -->
     <h1>{{ review.title }}</h1>
+
     <!-- 영화 제목 -->
     <p class="movie-title">
       영화: 
@@ -8,6 +19,7 @@
         {{ review.movie_title }}
       </router-link>
     </p>
+
     <p><strong>작성자:</strong> {{ review.user_nickname }}</p>
     <p v-if="!isEditing"><strong>내용:</strong> {{ review.content }}</p>
 
@@ -30,6 +42,7 @@
     <p v-if="!isEditing" class="likes">
       좋아요: {{ review.like_count }}
     </p>
+
     <!-- 좋아요 버튼 -->
     <button
       v-if="isAuthenticated && review.user_id !== currentUserId"
@@ -159,6 +172,13 @@ export default {
 </script>
 
 <style scoped>
+.movie-poster {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
 button {
   padding: 5px 10px;
   border: none;

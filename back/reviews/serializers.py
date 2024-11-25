@@ -6,6 +6,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     movie_id = serializers.IntegerField(write_only=True)  # 작성 시 사용할 movie_id
     movie_tmdb_id = serializers.IntegerField(source="movie.tmdb_id", read_only=True)  # 응답 데이터에 포함할 movie_id
     movie_title = serializers.CharField(source="movie.title", read_only=True)  # 영화 제목
+    movie_poster = serializers.CharField(source="movie.poster_path", read_only=True)  # 영화 포스터 경로 추가
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)  # 작성자 닉네임 추가
     user_id = serializers.IntegerField(source="user.id", read_only=True)  # 작성자 ID 추가
     liked_by_user = serializers.SerializerMethodField()  # 사용자가 좋아요를 눌렀는지 여부
@@ -14,12 +15,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = [
-            'id', 'movie_id', 'movie_tmdb_id', 'movie_title', 'title', 'content',
+            'id', 'movie_id', 'movie_tmdb_id', 'movie_title', 'movie_poster', 'title', 'content',
             'like_count', 'created_at', 'updated_at', 'user_nickname',
             'liked_by_user', 'user_id', 'star_rating',  # 별점 추가
         ]
         read_only_fields = [
-            'movie_tmdb_id', 'movie_title', 'like_count', 'created_at', 'updated_at',
+            'movie_tmdb_id', 'movie_title', 'movie_poster', 'like_count', 'created_at', 'updated_at',
             'user_nickname', 'liked_by_user', 'user_id',
         ]
 
