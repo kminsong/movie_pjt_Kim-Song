@@ -14,6 +14,16 @@
         <p><strong>평점:</strong> {{ movie?.vote_average || "정보 없음" }}</p>
         <p><strong>리뷰 평점:</strong> <span v-html="getStarRating(movieAverageRating)"></span></p>
         <p><strong>줄거리:</strong> {{ movie?.overview || "정보 없음" }}</p>
+        <div class="genres-container">
+          <p
+            v-for="genre in movie?.genres"
+            :key="genre.id"
+            @click="goToMoviesByGenre(genre.id)"
+            class="clickable-genre"
+          >
+            #{{ genre.name }}
+          </p>
+        </div>
       </div>
     </div>
 
@@ -111,6 +121,9 @@ export default {
         .catch((error) => {
           console.error("영화 정보를 가져오는 중 오류 발생:", error);
         });
+    },
+    goToMoviesByGenre(genreId) {
+      this.$router.push({ name: "Movies", query: { genreId } });
     },
     fetchReviews(movieId) {
       axios
@@ -222,6 +235,23 @@ export default {
 </script>
 
 <style scoped>
+.genres-container {
+  display: flex; /* Flexbox로 한 줄 배치 */
+  flex-wrap: nowrap; /* 줄바꿈 방지 */
+  gap: 10px; /* 장르 간 간격 */
+  margin-top: 10px; /* 위 내용과 간격 */
+}
+
+.clickable-genre {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.clickable-genre:hover {
+  color: #0056b3;
+}
+
 /* 부모 컨테이너를 Flexbox로 설정 */
 .movie-detail {
   display: flex;

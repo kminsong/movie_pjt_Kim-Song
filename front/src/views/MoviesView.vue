@@ -113,6 +113,10 @@ export default {
   },
   created() {
     this.fetchGenres();
+    const genreId = this.$route.query.genreId;
+    if (genreId) {
+      this.selectedGenres = [parseInt(genreId)];
+    }
     this.searchMovies();
   },
   methods: {
