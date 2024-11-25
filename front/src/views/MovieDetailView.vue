@@ -1,5 +1,12 @@
 <template>
-  <div>
+  <div class="bg">
+    <div v-if="trailerUrl" class="trailer-container">
+      <iframe
+        :src="trailerUrl"
+        allowfullscreen
+        title="Movie Trailer"
+      ></iframe>
+    </div>
     <!-- 영화 상세 -->
     <div class="movie-detail">
       <!-- 포스터 -->
@@ -15,65 +22,64 @@
         <p><strong>리뷰 평점:</strong> <span v-html="getStarRating(movieAverageRating)"></span></p>
         <p><strong>줄거리:</strong> {{ movie?.overview || "정보 없음" }}</p>
         <div class="genres-container">
-          <p
+          <button
             v-for="genre in movie?.genres"
             :key="genre.id"
             @click="goToMoviesByGenre(genre.id)"
-            class="clickable-genre"
+            class="genre-button"
           >
             #{{ genre.name }}
-          </p>
+          </button>
         </div>
       </div>
     </div>
 
+    <div class="review-container">
     <!-- 리뷰 작성 및 목록 -->
-    <h3>리뷰</h3>
-    <button v-if="isAuthenticated" @click="toggleReviewForm">
-      {{ showReviewForm ? "작성 취소" : "리뷰 작성하기" }}
-    </button>
-    <div v-if="showReviewForm" class="review-form">
-      <label for="review-title">리뷰 제목</label>
-      <input id="review-title" v-model="reviewTitle" placeholder="리뷰 제목" />
-      <label for="review-content">리뷰 내용</label>
-      <textarea
-        id="review-content"
-        v-model="reviewContent"
-        placeholder="리뷰 내용을 작성하세요"
-      ></textarea>
-      <div class="rating">
-        <label>별점:</label>
-        <div class="stars">
-          <span
-            v-for="index in 5"
-            :key="index"
-            class="star"
-            :class="{ filled: index <= starRating }"
-            @click="setStarRating(index)"
-          >
-            ★
-          </span>
+      <h3>리뷰</h3>
+      <button v-if="isAuthenticated" @click="toggleReviewForm">
+        {{ showReviewForm ? "작성 취소" : "리뷰 작성하기" }}
+      </button>
+      <div v-if="showReviewForm" class="review-form">
+        <label for="review-title">리뷰 제목</label>
+        <input id="review-title" v-model="reviewTitle" placeholder="리뷰 제목" />
+        <label for="review-content">리뷰 내용</label>
+        <textarea
+          id="review-content"
+          v-model="reviewContent"
+          placeholder="리뷰 내용을 작성하세요"
+        ></textarea>
+        <div class="rating">
+          <label>별점:</label>
+          <div class="stars">
+            <span
+              v-for="index in 5"
+              :key="index"
+              class="star"
+              :class="{ filled: index <= starRating }"
+              @click="setStarRating(index)"
+            >
+              ★
+            </span>
+          </div>
         </div>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <button @click="submitReview" class="create_bt">작성</button>
       </div>
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-      <button @click="submitReview">작성</button>
-    </div>
-    <p v-else-if="!isAuthenticated">로그인 후 리뷰를 작성할 수 있습니다.</p>
+      <p v-else-if="!isAuthenticated">로그인 후 리뷰를 작성할 수 있습니다.</p>
 
-    <div v-if="reviews.length > 0">
-      <ul>
-        <li v-for="review in topReviews" :key="review.id">
-          <router-link :to="{ name: 'ReviewDetail', params: { id: review.id } }">
-            <strong>{{ review.title || "제목 없음" }}</strong>
-          </router-link>
-          - 좋아요: {{ review.like_count || 0 }}
-        </li>
-      </ul>
+      <div v-if="reviews.length > 0">
+        <ul>
+          <li v-for="review in topReviews" :key="review.id">
+            <router-link :to="{ name: 'ReviewDetail', params: { id: review.id } }">
+              <strong>{{ review.title || "제목 없음" }}</strong>
+            </router-link>
+            - 좋아요: {{ review.like_count || 0 }}
+          </li>
+        </ul>
+      </div>
+      <p v-else>리뷰가 없습니다</p>
     </div>
-    <p v-else>리뷰가 없습니다</p>
-
-    <!-- 뒤로가기 버튼 -->
-    <button @click="goBack">뒤로가기</button>
   </div>
 </template>
 
@@ -85,6 +91,7 @@ export default {
   data() {
     return {
       movie: null, // 현재 영화 데이터
+      trailerUrl: null, // 트레일러 URL 추가
       reviews: [], // 전체 리뷰 목록
       topReviews: [], // 상위 3개 리뷰
       isAuthenticated: false, // 로그인 여부
@@ -101,6 +108,7 @@ export default {
 
     if (movieId) {
       this.fetchMovieDetails(movieId); // 영화 상세 정보 가져오기
+      this.fetchMovieTrailer(movieId); // 트레일러 가져오기
       this.fetchReviews(movieId); // 영화 리뷰 가져오기
     } else {
       console.error("영화 ID가 유효하지 않습니다.");
@@ -109,9 +117,6 @@ export default {
     this.isAuthenticated = !!localStorage.getItem("authToken"); // 토큰으로 로그인 상태 확인
   },
   methods: {
-    goBack() {
-      this.$router.go(-1);
-    },
     fetchMovieDetails(movieId) {
       tmdb
         .get(`/movie/${movieId}`, { params: { language: "ko-KR" } })
@@ -120,6 +125,21 @@ export default {
         })
         .catch((error) => {
           console.error("영화 정보를 가져오는 중 오류 발생:", error);
+        });
+    },
+    fetchMovieTrailer(movieId) {
+      tmdb
+        .get(`/movie/${movieId}/videos`, { params: { language: "ko-KR" } })
+        .then((response) => {
+          const trailers = response.data.results.filter(
+            (video) => video.type === "Trailer" && video.site === "YouTube"
+          );
+          if (trailers.length > 0) {
+            this.trailerUrl = `https://www.youtube.com/embed/${trailers[0].key}`;
+          }
+        })
+        .catch((error) => {
+          console.error("트레일러 정보를 가져오는 중 오류 발생:", error);
         });
     },
     goToMoviesByGenre(genreId) {
@@ -235,12 +255,95 @@ export default {
 </script>
 
 <style scoped>
-.genres-container {
-  display: flex; /* Flexbox로 한 줄 배치 */
-  flex-wrap: nowrap; /* 줄바꿈 방지 */
-  gap: 10px; /* 장르 간 간격 */
-  margin-top: 10px; /* 위 내용과 간격 */
+.create_bt {
+  margin-right: 105px;
 }
+
+h1 {
+  font-size: 42px !important; /* 강제 적용 */
+  font-weight: bold;
+}
+
+.bg {
+  min-height: 100vh; /* 화면 전체 높이를 최소 높이로 설정 */
+  display: flex; /* 중앙 정렬을 위한 Flexbox */
+  flex-direction: column; /* 세로 정렬 */
+  justify-content: space-between; /* 컨텐츠 위-아래 균형 조정 */
+}
+
+.review-container {
+  position: relative; /* 버튼을 절대 위치로 배치하기 위한 기준 */
+  align-items: flex-start;
+  margin: 20px 100px;
+  background: #2c2c2c;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.review-container button {
+  position: absolute; /* 버튼을 절대 위치로 설정 */
+  top: 15px; /* 컨테이너 위에서 10px */
+  right: 15px; /* 컨테이너 오른쪽에서 10px */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.review-container button:hover {
+  background-color: #0056b3; /* 버튼 hover 스타일 */
+}
+
+.trailer-container {
+  min-width: 500px;
+  position: relative;
+  width: 60%; /* 너비: 화면의 80% */
+  margin: 40px auto 10px; /* 상하 여백을 각각 10px로 설정 */
+  padding-bottom: 30%; /* 높이를 16:9 비율보다 작게 (45%로 설정) */
+  overflow: hidden;
+  border-radius: 10px; /* 선택 사항: 모서리를 둥글게 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* 선택 사항: 그림자 */
+  background-color: #000; /* 비디오 로드 전 배경 */
+}
+
+.trailer-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* 부모 컨테이너 너비에 맞춤 */
+  height: 100%; /* 부모 컨테이너 높이에 맞춤 */
+  border: 0;
+}
+
+.genres-container {
+  display: flex;
+  flex-wrap: wrap; /* 버튼을 여러 줄로 배치 */
+  gap: 10px; /* 버튼 간 간격 */
+  margin-top: 10px;
+}
+
+.genre-button {
+  background-color: #007bff; /* 버튼 배경색 */
+  color: white; /* 버튼 텍스트 색상 */
+  border: none; /* 기본 테두리 제거 */
+  border-radius: 20px; /* 둥근 모양 */
+  padding: 8px 15px; /* 버튼 안쪽 여백 */
+  font-size: 14px; /* 글씨 크기 */
+  cursor: pointer; /* 마우스 커서를 포인터로 */
+  transition: background-color 0.3s ease; /* 호버 애니메이션 */
+}
+
+.genre-button:hover {
+  background-color: #0056b3; /* 호버 시 배경색 */
+}
+
+.genre-button:active {
+  background-color: #003f7f; /* 클릭 시 배경색 */
+}
+
 
 .clickable-genre {
   cursor: pointer;
@@ -254,26 +357,35 @@ export default {
 
 /* 부모 컨테이너를 Flexbox로 설정 */
 .movie-detail {
+  min-width: 600px;
   display: flex;
   align-items: flex-start; /* 위쪽 정렬 */
-  gap: 20px; /* 포스터와 정보 사이 간격 */
-  margin-bottom: 20px;
+  margin: 50px 100px;
+  background: #2c2c2c;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
-
+.swiper-container {
+  background: #2c2c2c; /* 슬라이더 배경 */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
 /* 포스터 스타일 */
 .poster img {
-  max-width: 300px;
-  height: auto;
+  min-width: 250px;
+  width: 70%;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* 영화 정보 스타일 */
 .info {
-  flex: 1; /* 남은 공간을 차지 */
   display: flex;
   flex-direction: column;
-  gap: 10px; /* 항목 간 간격 */
+  gap: 15px; /* 항목 간 간격 */
+  margin-left: -45px;
 }
 
 h1 {
@@ -345,4 +457,5 @@ label {
 .star.filled {
   color: gold;
 }
+
 </style>

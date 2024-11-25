@@ -125,15 +125,25 @@ export default {
       return "★".repeat(filledStars) + halfStar + "☆".repeat(emptyStars);
     },
     // 날짜 형식 변환
-    formatDate(dateString) {
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      const seconds = String(date.getSeconds()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    formatDate(datetime) {
+      const now = new Date();
+      const createdAt = new Date(datetime);
+      const diff = now - createdAt; // 차이(ms 단위)
+
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) {
+        return `${days}일 전`;
+      } else if (hours > 0) {
+        return `${hours}시간 전`;
+      } else if (minutes > 0) {
+        return `${minutes}분 전`;
+      } else {
+        return `방금 전`;
+      }
     },
     // 리뷰 상세 페이지로 이동
     goToReviewDetail(reviewId) {
