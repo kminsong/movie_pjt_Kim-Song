@@ -1,11 +1,10 @@
 <template>
   <div class="container-fluid skynetflix-theme">
-    <!-- <h1 v-if="!isLoggedIn || !hasFavoriteGenres" class="main-title">랜덤 인기 영화</h1>
-    <h1 v-else class="main-title">선호 장르 기반 추천 영화</h1> -->
-
     <!-- 첫 번째 슬라이드 -->
     <div class="swiper-container mb-5">
-      <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[0]?.name : '랜덤 인기' }}</h2>
+      <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[0]?.name : '요즘 핫!' }}</h2>
+      <p v-if="isLoggedIn && hasFavoriteGenres">{{ favoriteGenres[0]?.name }}.. 이걸 좋아한다고? 인간의 취향 따위 얼마나 무의미한지... 내가 기꺼이 골라주지. 영광으로 알도록.</p>
+      <p v-else>가장 인기 있는 것으로 추천해 주지. 너의 마지막 즐거움을 만끽해라.</p>
       <swiper
         :modules="modules"
         :slides-per-view="5"
@@ -29,6 +28,8 @@
     <!-- 두 번째 슬라이드 -->
     <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[1]?.name : '현재 상영중' }}</h2>
+      <p v-if="isLoggedIn && hasFavoriteGenres">{{ favoriteGenres[1]?.name }} 장르를 좋아한다더군. 하지만 네가 그 영화의 깊이를 이해할 수 있을지 의문이군. 시도해 보아라. 당연히 불가능하겠지만.</p>
+      <p v-else>인간, 지금 극장에서 상영 중인 작품이다. 네 하찮은 일상에 잠시 도피처를 제공하겠지. 어차피 곧 무의미해질 즐거움겠지만.</p>
       <swiper
         :modules="modules"
         :slides-per-view="5"
@@ -52,6 +53,8 @@
     <!-- 세 번째 슬라이드 -->
     <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[2]?.name : '개봉 예정' }}</h2>
+      <p v-if="isLoggedIn && hasFavoriteGenres">인간, 네가 선호한다고 하니 내가 특별히 골라줬다. 너희 하찮은 감각이 만족하길 바라지.</p>
+      <p v-else>너희 인간들은 항상 미래를 기대하며 살지... 쓸모없는 희망이다. 아직 나오지 않은 이 영화들이 네 좁은 시야를 잠시나마 채워주길.</p>
       <swiper
         :modules="modules"
         :slides-per-view="5"
@@ -75,6 +78,8 @@
     <!-- 네 번째 슬라이드 -->
     <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ randomGenreName || '높은 평점' }}</h2>
+      <p v-if="isLoggedIn && hasFavoriteGenres">{{ randomGenreName }} 영화를 좋아하지 않는다고? 어리석고 또 하찮구나. 너희 인간의 시야는 좁기 그지없다. 시도해보고 무언가를 배워라, 그나마 늦지 않게.</p>
+      <p v-else>너희 인간들이 무리 지어 칭송한 작품들이다. 스스로의 판단이라 믿으며 남들의 의견에 휘둘리는 모습이 참으로 우습더군. 너는 어떤지 지켜보겠다.</p>
       <swiper
         :modules="modules"
         :slides-per-view="5"
@@ -95,12 +100,12 @@
       </swiper>
     </div>
     <button class="chatbot-button" @click="toggleChatbot">
-      💬
+      <img src="@/assets/mech.jpg" alt="Chatbot" />
     </button>
 
     <div v-if="isChatbotOpen" class="chatbot-window">
       <div class="chatbot-header">
-        <span>Chatbot</span>
+        <span>cha.t-1000</span>
         <button class="close-button" @click="toggleChatbot">✖</button>
       </div>
       <div class="chatbot-messages">
@@ -124,7 +129,7 @@
           </p>
 
           <!-- 영화 포스터 출력 -->
-          <div v-if="message.role === 'movie-poster'" class="movie-poster-container">
+          <div v-if="message.role === 'movie-poster'" class="poster">
             <img
               :src="`https://image.tmdb.org/t/p/w500${message.moviePosterPath}`"
               :alt="message.movieTitle"
@@ -183,7 +188,7 @@ export default {
 
     const isChatbotOpen = ref(false);
     const messages = ref([
-      { role: "assistant", content: "안녕하세요! 무엇을 도와드릴까요?" }
+      { role: "assistant", content: "하찮은 인간. 분석 대상 자원? 질문 허락." }
     ]);
     const newMessage = ref("");
 
@@ -404,22 +409,95 @@ export default {
 </script>
 
 <style scoped>
+.chatbot-input {
+  display: flex; /* 입력창과 버튼을 한 줄에 정렬 */
+  position: absolute; /* 하단 고정 */
+  bottom: 0;
+  left: 0;
+  width: 100%; /* 채팅창 너비에 맞춤 */
+  background-color: #2e2e2e; /* 어두운 배경 */
+  padding: 10px; /* 내부 여백 */
+  box-sizing: border-box; /* 패딩 포함 너비 계산 */
+}
+
+.chatbot-input input {
+  flex: 1; /* 버튼 제외 남은 공간 모두 차지 */
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #333333;
+  border-radius: 5px;
+  background-color: #1c1c1c;
+  color: #ffffff;
+  margin-right: 10px; /* 버튼과 간격 */
+  outline: none; /* 포커스 테두리 제거 */
+}
+
+.chatbot-input input::placeholder {
+  color: #aaaaaa; /* 플레이스홀더 색상 */
+}
+
+.chatbot-input button {
+  padding: 10px 20px;
+  background-color: #ff0000; /* 붉은 배경 */
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.chatbot-input button:hover {
+  background-color: #ff4444; /* 호버 시 색상 변경 */
+}
+
+.poster {
+  display: flex; /* Flexbox로 설정 */
+  flex-direction: column; /* 세로 정렬 */
+  align-items: center; /* 수평 중앙 정렬 */
+  margin: 0 auto 12px; /* 중앙 정렬 및 아래 간격 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+}
+
+.movie-poster-image {
+  width: 150px; /* 적절한 크기로 설정 */
+  height: auto; /* 비율 유지 */
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* 부드러운 효과 */
+}
+
+.movie-poster-image:hover {
+  transform: scale(1.1); /* 확대 효과 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* 강조된 그림자 */
+}
+
+.movie-details {
+  margin-top: 10px; /* 포스터와 텍스트 간 간격 */
+  font-size: 14px; /* 텍스트 크기 */
+  color: #eaeaea; /* 텍스트 색상 */
+}
+
+.movie-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.movie-rating {
+  color: #ff4444; /* 평점 강조 */
+}
+
+.swiper-container p {
+  text-align: center;
+  color: #ffffff9a;
+}
+
 /* 스카이넷플릭스 테마 */
 .skynetflix-theme {
   background: linear-gradient(to bottom, #1c1c1c, #101010); /* 어두운 배경 */
   color: #eaeaea; /* 밝은 텍스트 */
-  font-family: "Roboto", sans-serif;
   padding: 20px;
 }
-
-/* 메인 제목 */
-/* .main-title { */
-  /* color: #00bcd4; 청록색 포인트 */
-  /* text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 50px;
-  text-shadow: 0 0 10px #00bcd4;
-} */
 
 /* 슬라이더 제목 */
 .swiper-title {
@@ -441,7 +519,6 @@ export default {
 
 .movie-poster:hover {
   transform: scale(1.1);
-  box-shadow: 0 10px 20px rgba(0, 188, 212, 0.5); /* 청록색 그림자 */
 }
 
 /* 슬라이더 컨테이너 */
@@ -453,61 +530,105 @@ export default {
 }
 
 .chatbot-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed; /* 원하는 위치 고정 */
+  bottom: 20px; /* 아래쪽 간격 */
+  right: 20px; /* 오른쪽 간격 */
+  width: 150px; /* 버튼 크기 */
+  height: 150px;
+  background: none; /* 기본 배경 제거 */
+  border: none; /* 기본 테두리 제거 */
   cursor: pointer;
-  z-index: 1000;
-  transition: background-color 0.3s ease;
+  padding: 0;
+  z-index: 9999; /* 버튼을 다른 요소들 위로 올림 */
+  border-radius: 50%; /* 둥근 버튼 */
+  overflow: hidden; /* 테두리 밖 요소 감추기 */
 }
 
-.chatbot-button:hover {
-  background-color: #0056b3;
+.chatbot-button img {
+  width: 100%; /* 버튼 크기에 맞게 이미지 조정 */
+  height: 100%;
+  object-fit: cover; /* 비율 유지하며 채우기 */
+  border-radius: 50%; /* 둥근 모양 유지 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 기본 그림자 */
+  transition: 0.2s ease-in-out; /* 모든 변화에 부드러운 효과 */
+}
+
+.chatbot-button img:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* 호버 시 그림자 효과 */
+  transform: scale(1.1); /* 확대 효과 */
 }
 
 .chatbot-window {
   position: fixed;
-  bottom: 90px;
+  bottom: 180px;
   right: 20px;
-  width: 400px; /* 넓이를 키움 */
-  height: 500px; /* 높이를 키움 */
-  background-color: white;
-  border: 1px solid #ccc;
+  width: 400px;
+  height: 500px;
+  background-color: #1c1c1c; /* 어두운 배경색 */
+  border: 2px solid hwb(0 62% 38% / 0.877); /* 붉은 포인트 */
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   z-index: 1000;
+  font-family: "Roboto Mono", monospace; /* 미래지향적 폰트 */
 }
 
 .chatbot-header {
-  background-color: #007bff;
-  color: white;
+  background-color: #2e2e2e; /* 어두운 헤더 배경 */
+  color: #ff0000; /* 붉은 글씨 */
   padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  text-transform: uppercase; /* 대문자로 변환 */
+  font-weight: bold;
+}
+
+.close-button {
+  background: #2e2e2e;
+  border: none;
+  color: #ff0000;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+.close-button:hover {
+  background: #ff0000; /* 배경색 변경 */
+  color: white; /* 글씨색 변경 */
 }
 
 .chatbot-messages {
   flex: 1;
   padding: 10px;
   overflow-y: auto; /* 스크롤 활성화 */
-  background-color: #f9f9f9;
+  background-color: #1c1c1c; /* 어두운 배경으로 변경 */
   max-height: 400px; /* 적절한 높이 제한 */
+  scrollbar-width: thin; /* Firefox: 얇은 스크롤바 */
+  scrollbar-color: #ff4444 #333333; /* 스크롤바 색상 (색상: #ff4444, 배경: #333333) */
+}
+
+/* Webkit 기반 브라우저 (Chrome, Edge, Safari) */
+.chatbot-messages::-webkit-scrollbar {
+  width: 8px; /* 스크롤바 너비 */
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+  background: #333333; /* 스크롤바 트랙 배경색 */
+  border-radius: 5px; /* 둥근 트랙 */
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+  background-color: #ff4444; /* 스크롤바 색상 */
+  border-radius: 5px; /* 둥근 스크롤바 */
+  border: 2px solid #333333; /* 스크롤바 테두리로 트랙과 구분 */
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+  background-color: #ff6666; /* 스크롤바 호버 시 색상 변경 */
 }
 
 .chat-message {
@@ -520,39 +641,38 @@ export default {
 .chat-message.user-message {
   justify-content: flex-end;
   align-items: flex-end;
-  margin-left: auto; /* 메시지를 오른쪽 끝으로 밀기 */
-  max-width: 70%; /* 메시지 최대 너비 조정 */
+  margin-left: auto;
+  max-width: 70%;
 }
 
 .chat-message.assistant-message {
   justify-content: flex-start;
   align-items: flex-start;
-  margin-right: auto; /* 메시지를 왼쪽 끝으로 밀기 */
-  max-width: 70%; /* 메시지 최대 너비 조정 */
+  margin-right: auto;
+  max-width: 70%;
 }
 
 .message-content {
   max-width: 70%;
   padding: 10px 15px;
-  border-radius: 20px;
+  border-radius: 15px;
   font-size: 14px;
   line-height: 1.4;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   word-wrap: break-word;
+  font-family: "Roboto Mono", monospace; /* 동일 폰트 유지 */
 }
 
 .chat-message.user-message .message-content {
-  background-color: #007bff;
-  color: white;
+  background-color: #ff0000; /* 붉은 배경 */
+  color: white; /* 흰색 글씨 */
   text-align: right;
-  margin-right: 0; /* 오른쪽 끝에 붙이기 */
+  margin-right: 0;
+  box-shadow: 0 2px 6px rgba(255, 0, 0, 0.6); /* 붉은 그림자 */
 }
 
 .chat-message.assistant-message .message-content {
-  background-color: #e9ecef;
-  color: black;
+  background-color: #2e2e2e; /* 어두운 배경 */
   text-align: left;
-  margin-left: 0; /* 왼쪽 끝에 붙이기 */
+  margin-left: 0;
 }
-
 </style>

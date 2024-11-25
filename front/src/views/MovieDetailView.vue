@@ -128,18 +128,46 @@ export default {
         });
     },
     fetchMovieTrailer(movieId) {
+      // 1. 한국어 트레일러 시도
       tmdb
         .get(`/movie/${movieId}/videos`, { params: { language: "ko-KR" } })
         .then((response) => {
           const trailers = response.data.results.filter(
             (video) => video.type === "Trailer" && video.site === "YouTube"
           );
+
           if (trailers.length > 0) {
+            // 한국어 트레일러가 있으면 설정
             this.trailerUrl = `https://www.youtube.com/embed/${trailers[0].key}`;
+          } else {
+            // 2. 영어 트레일러 요청
+            this.fetchEnglishTrailer(movieId);
           }
         })
         .catch((error) => {
           console.error("트레일러 정보를 가져오는 중 오류 발생:", error);
+          // 한국어 트레일러 요청 실패 시 영어 트레일러 시도
+          this.fetchEnglishTrailer(movieId);
+        });
+    },
+
+    // 영어 트레일러를 가져오는 메서드 추가
+    fetchEnglishTrailer(movieId) {
+      tmdb
+        .get(`/movie/${movieId}/videos`, { params: { language: "en-US" } })
+        .then((response) => {
+          const trailers = response.data.results.filter(
+            (video) => video.type === "Trailer" && video.site === "YouTube"
+          );
+
+          if (trailers.length > 0) {
+            this.trailerUrl = `https://www.youtube.com/embed/${trailers[0].key}`;
+          } else {
+            console.warn("트레일러가 없습니다.");
+          }
+        })
+        .catch((error) => {
+          console.error("영어 트레일러 정보를 가져오는 중 오류 발생:", error);
         });
     },
     goToMoviesByGenre(genreId) {
@@ -268,17 +296,16 @@ h1 {
   min-height: 100vh; /* 화면 전체 높이를 최소 높이로 설정 */
   display: flex; /* 중앙 정렬을 위한 Flexbox */
   flex-direction: column; /* 세로 정렬 */
-  justify-content: space-between; /* 컨텐츠 위-아래 균형 조정 */
 }
 
 .review-container {
-  position: relative; /* 버튼을 절대 위치로 배치하기 위한 기준 */
   align-items: flex-start;
-  margin: 20px 100px;
+  margin: 20px 100px; /* 무비 디테일 컨테이너와 간격 */
   background: #2c2c2c;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  position: static; /* 기본 흐름에서 movie-detail 바로 아래 배치 */
 }
 
 .review-container button {
@@ -361,7 +388,7 @@ h1 {
   display: flex;
   gap: 30px;
   align-items: flex-start; /* 위쪽 정렬 */
-  margin: 50px 100px;
+  margin: 20px 100px;
   background: #2c2c2c;
   padding: 20px;
   border-radius: 10px;
@@ -376,7 +403,6 @@ h1 {
 /* 포스터 스타일 */
 .poster img {
   min-width: 250px;
-  /* width: 70%; */
   width: 250px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -387,7 +413,6 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 15px; /* 항목 간 간격 */
-  /* margin-left: -45px; */
 }
 
 h1 {
