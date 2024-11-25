@@ -7,14 +7,20 @@
       <button @click="goToAllPosts" :class="{ active: isAllPosts }">전체글</button>
       <button @click="goToHotPosts" :class="{ active: isHotPosts }">Hot</button>
       <button
-        v-if="canWritePost"
+        v-if="isAuthenticated"
         @click="goToPostForm"
         class="write-button"
       >
         게시글 작성하기
       </button>
+      <button
+        v-else
+        @click="showLoginAlert"
+        class="write-button"
+      >
+        게시글 작성하기
+      </button>
     </div>
-
 
     <!-- 필터 추가 -->
     <div class="filters">
@@ -60,15 +66,17 @@ export default {
     return {
       isHotPosts: false,
       filter: "latest",
+      isAuthenticated: false, // 로그인 상태 확인
     };
   },
   computed: {
     isAllPosts() {
       return !this.isHotPosts;
     },
-    canWritePost() {
-      return true; // 로그인 여부에 따라 수정 가능
-    },
+  },
+  created() {
+    // 로그인 상태 확인
+    this.isAuthenticated = !!localStorage.getItem("authToken");
   },
   methods: {
     goToAllPosts() {
@@ -79,6 +87,9 @@ export default {
     },
     goToPostForm() {
       this.$router.push({ name: "PostCreate" });
+    },
+    showLoginAlert() {
+      alert("로그인 후 게시글을 작성할 수 있습니다.");
     },
     applyFilter() {},
   },
