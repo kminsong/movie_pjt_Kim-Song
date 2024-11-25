@@ -5,10 +5,10 @@
         <strong>{{ comment.author_name }}</strong>: {{ comment.content }}
         <span class="timestamp">{{ formatDate(comment.created_at) }}</span>
         <!-- 본인 댓글에만 수정/삭제 버튼 표시 -->
-        <span v-if="comment.author_id === currentUserId" class="actions">
+        <div v-if="comment.author_id === currentUserId" class="actions">
           <button @click="editComment(comment.id)">[수정]</button>
           <button @click="deleteComment(comment.id)">[삭제]</button>
-        </span>
+        </div>
       </li>
     </ul>
     <form @submit.prevent="submitComment">
@@ -35,6 +35,7 @@ export default {
     async fetchComments() {
       try {
         const response = await axios.get(`/community/posts/${this.postId}/comments/`);
+        console.log("Fetched comments:", response.data);
         this.comments = response.data;
       } catch (error) {
         console.error("댓글 불러오기 실패:", error);
@@ -55,6 +56,7 @@ export default {
         console.log("Submitting comment:", {
           post: this.postId,
           content: this.content,
+          author: this.currentUserId,
         });
         await axios.post(
           `/community/posts/${this.postId}/comments/`,
@@ -73,19 +75,30 @@ export default {
       }
     },
     async editComment(commentId) {
-      const newContent = prompt("댓글 내용을 수정하세요:", this.comments.find(c => c.id === commentId).content);
+      const newContent = prompt(
+        "댓글 내용을 수정하세요:",
+        this.comments.find(c => c.id === commentId).content
+      );
+
       if (newContent) {
         try {
-          await axios.put(
-            `/community/posts/${this.postId}/comments/${commentId}/`,
-            { content: newContent },
+          const url = `/community/posts/${this.postId}/comments/${commentId}/`;
+          console.log("Updating comment at:", url); // 디버깅: 요청 URL 확인
+          console.log("Request data:", { content: newContent }); // 디버깅: 요청 데이터 확인
+
+          await axios.patch(
+            url, // PATCH 요청으로 변경
+            { content: newContent }, // 수정 필드만 포함
             {
               headers: { Authorization: `Token ${localStorage.getItem("authToken")}` },
             }
           );
+
           this.fetchComments(); // 댓글 목록 갱신
+          alert("댓글이 수정되었습니다.");
         } catch (error) {
-          console.error("댓글 수정 실패:", error);
+          console.error("댓글 수정 실패:", error.response ? error.response.data : error);
+          alert("댓글 수정에 실패했습니다.");
         }
       }
     },

@@ -3,6 +3,7 @@ from .views import (
     PostListCreateView,
     PostDetailView,
     CommentListCreateView,
+    CommentRetrieveUpdateDestroyView,
     PostLikeAPIView,
     PostDislikeAPIView,
 )
@@ -13,4 +14,5 @@ urlpatterns = [
     path("posts/<int:pk>/like/", PostLikeAPIView.as_view(), name="post-like"),
     path("posts/<int:pk>/dislike/", PostDislikeAPIView.as_view(), name="post-dislike"),
     path("posts/<int:post_id>/comments/", CommentListCreateView.as_view(), name="comment-list-create"),
+    path("posts/<int:post_id>/comments/<int:pk>/", CommentRetrieveUpdateDestroyView.as_view(), name="comment-detail"),
 ]

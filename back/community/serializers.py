@@ -3,10 +3,11 @@ from .models import Post, Comment
 
 class CommentSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.nickname", read_only=True)
+    author_id = serializers.IntegerField(source="author.id", read_only=True)
 
     class Meta:
         model = Comment
-        fields = ["id", "post", "author_name", "content", "created_at"]
+        fields = ["id", "post", "author_name", "author_id", "content", "created_at"]
 
 class PostSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.nickname", read_only=True)
