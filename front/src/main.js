@@ -3,7 +3,8 @@ import App from "./App.vue";
 import { createPinia } from "pinia";
 import router from "./router";
 import axios from "axios"; // axios 추가
-
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 // axios 기본 URL 설정
 axios.defaults.baseURL = "http://127.0.0.1:8000/api";
 

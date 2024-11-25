@@ -1,12 +1,21 @@
 <template>
   <div>
-    <!-- 영화 정보 -->
-    <h1>{{ movie?.title || "영화 제목 없음" }}</h1>
-    <img :src="getPosterPath(movie?.poster_path)" alt="poster" />
-    <p><strong>개봉일:</strong> {{ movie?.release_date || "정보 없음" }}</p>
-    <p><strong>평점:</strong> {{ movie?.vote_average || "정보 없음" }}</p>
-    <p><strong>리뷰 평점:</strong> <span v-html="getStarRating(movieAverageRating)"></span></p>
-    <p><strong>줄거리:</strong> {{ movie?.overview || "정보 없음" }}</p>
+    <!-- 영화 상세 -->
+    <div class="movie-detail">
+      <!-- 포스터 -->
+      <div class="poster">
+        <img :src="getPosterPath(movie?.poster_path)" alt="poster" />
+      </div>
+
+      <!-- 영화 정보 -->
+      <div class="info">
+        <h1>{{ movie?.title || "영화 제목 없음" }}</h1>
+        <p><strong>개봉일:</strong> {{ movie?.release_date || "정보 없음" }}</p>
+        <p><strong>평점:</strong> {{ movie?.vote_average || "정보 없음" }}</p>
+        <p><strong>리뷰 평점:</strong> <span v-html="getStarRating(movieAverageRating)"></span></p>
+        <p><strong>줄거리:</strong> {{ movie?.overview || "정보 없음" }}</p>
+      </div>
+    </div>
 
     <!-- 리뷰 작성 및 목록 -->
     <h3>리뷰</h3>
@@ -188,7 +197,10 @@ export default {
     },
     calculateAverageRating() {
       if (this.reviews.length > 0) {
-        const total = this.reviews.reduce((sum, review) => sum + (review.star_rating || 0), 0);
+        const total = this.reviews.reduce(
+          (sum, review) => sum + (review.star_rating || 0),
+          0
+        );
         this.movieAverageRating = (total / this.reviews.length).toFixed(1);
       } else {
         this.movieAverageRating = 0;
@@ -208,24 +220,40 @@ export default {
   },
 };
 </script>
+
 <style scoped>
+/* 부모 컨테이너를 Flexbox로 설정 */
+.movie-detail {
+  display: flex;
+  align-items: flex-start; /* 위쪽 정렬 */
+  gap: 20px; /* 포스터와 정보 사이 간격 */
+  margin-bottom: 20px;
+}
+
+/* 포스터 스타일 */
+.poster img {
+  max-width: 300px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* 영화 정보 스타일 */
+.info {
+  flex: 1; /* 남은 공간을 차지 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* 항목 간 간격 */
+}
+
 h1 {
   font-size: 24px;
   margin-bottom: 10px;
 }
 
-img {
-  max-width: 300px;
-  height: auto;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  margin-bottom: 10px;
+p {
+  font-size: 16px;
+  margin: 5px 0;
 }
 
 button {

@@ -1,10 +1,10 @@
 <template>
-  <div class="container">
-    <h1 v-if="!isLoggedIn || !hasFavoriteGenres">랜덤 인기 영화</h1>
-    <h1 v-else>선호 장르 기반 추천 영화</h1>
+  <div class="container-fluid skynetflix-theme">
+    <!-- <h1 v-if="!isLoggedIn || !hasFavoriteGenres" class="main-title">랜덤 인기 영화</h1>
+    <h1 v-else class="main-title">선호 장르 기반 추천 영화</h1> -->
 
     <!-- 첫 번째 슬라이드 -->
-    <div class="swiper-container">
+    <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[0]?.name : '랜덤 인기' }}</h2>
       <swiper
         :modules="modules"
@@ -27,7 +27,7 @@
     </div>
 
     <!-- 두 번째 슬라이드 -->
-    <div class="swiper-container">
+    <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[1]?.name : '현재 상영중' }}</h2>
       <swiper
         :modules="modules"
@@ -50,7 +50,7 @@
     </div>
 
     <!-- 세 번째 슬라이드 -->
-    <div class="swiper-container">
+    <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[2]?.name : '개봉 예정' }}</h2>
       <swiper
         :modules="modules"
@@ -73,7 +73,7 @@
     </div>
 
     <!-- 네 번째 슬라이드 -->
-    <div class="swiper-container">
+    <div class="swiper-container mb-5">
       <h2 class="swiper-title">{{ randomGenreName || '높은 평점' }}</h2>
       <swiper
         :modules="modules"
@@ -94,7 +94,6 @@
         </swiper-slide>
       </swiper>
     </div>
-
     <button class="chatbot-button" @click="toggleChatbot">
       💬
     </button>
@@ -405,6 +404,54 @@ export default {
 </script>
 
 <style scoped>
+/* 스카이넷플릭스 테마 */
+.skynetflix-theme {
+  background: linear-gradient(to bottom, #1c1c1c, #101010); /* 어두운 배경 */
+  color: #eaeaea; /* 밝은 텍스트 */
+  font-family: "Roboto", sans-serif;
+  padding: 20px;
+}
+
+/* 메인 제목 */
+/* .main-title { */
+  /* color: #00bcd4; 청록색 포인트 */
+  /* text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  text-shadow: 0 0 10px #00bcd4;
+} */
+
+/* 슬라이더 제목 */
+.swiper-title {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 0 5px #333;
+}
+
+/* 영화 카드 스타일 */
+.movie-poster {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.movie-poster:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 20px rgba(0, 188, 212, 0.5); /* 청록색 그림자 */
+}
+
+/* 슬라이더 컨테이너 */
+.swiper-container {
+  background: #2c2c2c; /* 슬라이더 배경 */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
 .chatbot-button {
   position: fixed;
   bottom: 20px;
@@ -508,109 +555,4 @@ export default {
   margin-left: 0; /* 왼쪽 끝에 붙이기 */
 }
 
-.movie-poster-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 10px 0;
-}
-
-.movie-poster-image {
-  width: 150px;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.movie-poster-image:hover {
-  transform: scale(1.05);
-}
-
-.movie-details {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.movie-title {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-.movie-rating {
-  font-size: 14px;
-  color: #555;
-}
-
-.chatbot-input {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-}
-
-.chatbot-input input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 5px;
-}
-
-.chatbot-input button {
-  padding: 8px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.chatbot-input button:hover {
-  background-color: #0056b3;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 150px;
-  align-items: center;
-}
-
-.swiper-container {
-  position: relative;
-  width: 80%;
-  margin: 0 auto;
-}
-
-.swiper-title {
-  position: absolute;
-  top: -70px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-}
-
-.custom-swiper {
-  width: 1300px;
-}
-
-.custom-slide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.movie-poster {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
 </style>
