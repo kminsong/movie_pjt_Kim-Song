@@ -272,7 +272,7 @@ export default {
         content: this.reviewContent.trim(),
         star_rating: this.starRating,
       };
-
+      console.log(newReview)
       axios
         .post("/reviews/", newReview, {
           headers: {

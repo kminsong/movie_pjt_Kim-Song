@@ -37,19 +37,4 @@ class MovieList(ListAPIView):
             queryset = queryset.order_by('-release_date')
 
         return queryset
-
-        queryset = Movie.objects.filter(adult=False)  # 기본적으로 성인 콘텐츠 제외
-
-        # 장르 필터링 (교집합)
-        if genres:
-            queryset = queryset.filter(genres__name__in=genres).distinct()
-            for genre in genres:
-                queryset = queryset.filter(genres__name=genre)
-
-        # 정렬 적용
-        if order_by == 'popularity':
-            queryset = queryset.order_by('-popularity')
-        elif order_by == 'release_date':
-            queryset = queryset.order_by('-release_date')
-
-        return queryset
+    

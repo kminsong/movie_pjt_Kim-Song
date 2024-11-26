@@ -5,12 +5,25 @@ from movies.models import Genre
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email', 'nickname']
+        fields = ['username', 'password', 'nickname', 'email']
         extra_kwargs = {'password': {'write_only': True}}
 
+    def validate_email(self, value):
+        """
+        이메일 중복 검사를 수행하지만 공백은 중복 검사를 하지 않음.
+        """
+        if value:  # 이메일 값이 제공된 경우에만 중복 체크
+            if User.objects.filter(email=value).exists():
+                raise serializers.ValidationError("이미 사용 중인 이메일입니다.")
+        return value  # 이메일이 None일 경우 빈 문자열 반환
+
     def create(self, validated_data):
-        # 새로운 사용자 생성
-        return User.objects.create_user(**validated_data)
+        # 비밀번호 분리
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)  # 비밀번호 암호화
+        user.save()
+        return user
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:

@@ -60,7 +60,7 @@
     />
 
     <!-- 페이지네이션 -->
-    <div v-if="totalPages > 1" class="pagination">
+    <div class="pagination">
       <button v-if="currentPage > 1" @click="fetchPostsByPage(1)">처음</button>
       <button v-if="currentPage > 1" @click="fetchPostsByPage(currentPage - 1)">이전</button>
 

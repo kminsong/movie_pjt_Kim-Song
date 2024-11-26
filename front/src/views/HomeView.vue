@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid skynetflix-theme">
     <!-- 첫 번째 슬라이드 -->
-    <div class="swiper-container mb-5">
+    <div v-if="firstSlideMovies.length > 0" class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[0]?.name : '요즘 핫!' }}</h2>
       <p v-if="isLoggedIn && hasFavoriteGenres">{{ favoriteGenres[0]?.name }}.. 이걸 좋아한다고? 인간의 취향 따위 얼마나 무의미한지... 내가 기꺼이 골라주지. 영광으로 알도록.</p>
       <p v-else>가장 인기 있는 것으로 추천해 주지. 너의 마지막 즐거움을 만끽해라.</p>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- 두 번째 슬라이드 -->
-    <div class="swiper-container mb-5">
+    <div v-if="secondSlideMovies.length > 0" class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[1]?.name : '현재 상영중' }}</h2>
       <p v-if="isLoggedIn && hasFavoriteGenres">{{ favoriteGenres[1]?.name }} 장르를 좋아한다더군. 하지만 네가 그 영화의 깊이를 이해할 수 있을지 의문이군. 시도해 보아라. 당연히 불가능하겠지만.</p>
       <p v-else>인간, 지금 극장에서 상영 중인 작품이다. 네 하찮은 일상에 잠시 도피처를 제공하겠지. 어차피 곧 무의미해질 즐거움겠지만.</p>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- 세 번째 슬라이드 -->
-    <div class="swiper-container mb-5">
+    <div v-if="thirdSlideMovies.length > 0" class="swiper-container mb-5">
       <h2 class="swiper-title">{{ isLoggedIn && hasFavoriteGenres ? favoriteGenres[2]?.name : '개봉 예정' }}</h2>
       <p v-if="isLoggedIn && hasFavoriteGenres">인간, 네가 선호한다고 하니 내가 특별히 골라줬다. 너희 하찮은 감각이 만족하길 바라지.</p>
       <p v-else>너희 인간들은 항상 미래를 기대하며 살지... 쓸모없는 희망이다. 아직 나오지 않은 이 영화들이 네 좁은 시야를 잠시나마 채워주길.</p>
@@ -76,7 +76,7 @@
     </div>
 
     <!-- 네 번째 슬라이드 -->
-    <div class="swiper-container mb-5">
+    <div v-if="randomGenreMovies.length > 0" class="swiper-container mb-5">
       <h2 class="swiper-title">{{ randomGenreName || '높은 평점' }}</h2>
       <p v-if="isLoggedIn && hasFavoriteGenres">{{ randomGenreName }} 영화를 좋아하지 않는다고? 어리석고 또 하찮구나. 너희 인간의 시야는 좁기 그지없다. 시도해보고 무언가를 배워라, 그나마 늦지 않게.</p>
       <p v-else>너희 인간들이 무리 지어 칭송한 작품들이다. 스스로의 판단이라 믿으며 남들의 의견에 휘둘리는 모습이 참으로 우습더군. 너는 어떤지 지켜보겠다.</p>

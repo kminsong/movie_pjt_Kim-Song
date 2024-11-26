@@ -4,10 +4,11 @@
     <div v-if="user">
       <p><strong>아이디:</strong> {{ user.username }}</p>
       <p><strong>닉네임:</strong> {{ user.nickname }}</p>
-      <p><strong>이메일:</strong> {{ user.email }}</p>
-
+      <div v-if="user.email">
+        <p><strong>이메일:</strong> {{ user.email }}</p>
+      </div>
       <div v-if="user.favorite_genres && user.favorite_genres.length > 0">
-        <p><strong>선호 장르:</strong></p>
+        <p><strong>선호 장르</strong></p>
         <div class="genre-tags">
           <span v-for="genre in user.favorite_genres" :key="genre.id" class="genre-tag">
             {{ genre.name }}
@@ -21,12 +22,12 @@
     <div v-else>
       <p>로그인 후 이용 가능합니다.</p>
     </div>
-
-    <button @click="openGenreModal">선호 장르 선택</button>
-    <button @click="openEditModal">회원 정보 수정</button>
-    <button @click="confirmDeleteAccount">회원 탈퇴</button>
-    <button @click="logout">로그아웃</button>
-
+    <div class="buttons">
+      <button @click="openGenreModal">선호 장르 선택</button>
+      <button @click="openEditModal">회원 정보 수정</button>
+      <button @click="confirmDeleteAccount">회원 탈퇴</button>
+      <button @click="logout">로그아웃</button>
+    </div>
     <GenreSelectModal
       v-if="isGenreModalOpen"
       :selectedGenres="selectedGenres"
@@ -176,9 +177,13 @@ export default {
 </script>
 
 <style scoped>
+.buttons {
+  margin-top: 20px;
+}
+
 .profile-container {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 550px;
+  margin: 220px auto;
   padding: 20px;
   background: #2c2c2c; /* 슬라이더 배경 */
   border-radius: 10px;
@@ -199,16 +204,6 @@ export default {
   border-radius: 20px; /* 둥근 모양 */
   padding: 8px 15px; /* 버튼 안쪽 여백 */
   font-size: 14px; /* 글씨 크기 */
-  cursor: pointer; /* 마우스 커서를 포인터로 */
-  transition: background-color 0.3s ease; /* 호버 애니메이션 */
-}
-
-.genre-tag:hover {
-  background-color: #0056b3; /* 호버 시 배경색 */
-}
-
-.genre-tag:active {
-  background-color: #003f7f; /* 클릭 시 배경색 */
 }
 
 .delete-confirm-modal {
@@ -225,7 +220,8 @@ export default {
 }
 
 .modal-content {
-  background: white;
+  background: #2c2c2c;
+  margin: 700px;
   padding: 20px;
   border-radius: 10px;
   text-align: center;

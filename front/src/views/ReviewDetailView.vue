@@ -215,6 +215,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 70px;
 }
 
 .poster-and-info {

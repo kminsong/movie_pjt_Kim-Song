@@ -46,7 +46,9 @@
           <img :src="getPosterPath(movie.poster_path)" alt="poster" />
           <p>{{ movie.title || '제목 없음' }}</p>
         </div>
-        <div v-if="movies.length === 20" class="circle-placeholder"></div>
+        <div v-if="movies.length === 20" class="circle-placeholder">
+          <img src="@/assets/skynetflix.jpg" alt="Skynetflix Logo" class="center-logo" />
+        </div>
       </div>
       <p v-else>해당되는 영화가 없습니다</p>
     </div>
@@ -194,15 +196,19 @@ export default {
 
 <style>
 .circle-placeholder {
-  width: 150px;
-  height: 150px;
-  background-color: #007bff;
-  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 40px auto 0; /* 상단 20px, 좌우 자동, 하단 0 */
-  grid-column: auto; /* 자동 배치 */
+  width: 100%;
+  height: 220px; /* 원하는 높이 설정 */
+}
+
+.center-logo {
+  width: 170px; /* 로고 크기 */
+  height: 170px;
+  border-radius: 50%; /* 동그라미 모양 */
+  object-fit: cover; /* 비율 유지하며 잘리지 않게 표시 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5); /* 그림자 효과 */
 }
 
 .circle-placeholder::after {

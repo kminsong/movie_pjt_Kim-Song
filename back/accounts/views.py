@@ -4,13 +4,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth import get_user_model
 from .models import User
 from movies.models import Genre
 from .serializers import UserSerializer, RegisterSerializer
 import logging
 
 logger = logging.getLogger(__name__)  # 디버깅 로그 추가
-
+User = get_user_model()
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -90,26 +92,22 @@ class ProfileView(APIView):
         user.delete()
         return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=HTTP_204_NO_CONTENT)
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_field(request, field):
+    """
+    특정 필드(username, email, nickname) 중복 검사
+    """
+    if field not in ["username", "email", "nickname"]:
+        return Response({"error": "허용되지 않은 필드입니다."}, status=400)
 
-class NicknameCheckView(APIView):
-    permission_classes = [AllowAny]
+    value = request.query_params.get(field)
+    if not value:
+        return Response({"error": f"{field} 값이 필요합니다."}, status=400)
 
-    def get(self, request):
-        nickname = request.query_params.get('nickname')
-        logger.info(f"닉네임 중복 검사 요청: {nickname}")  # 디버깅 로그 추가
-        if not nickname:
-            logger.error("닉네임이 제공되지 않았습니다.")  # 오류 로그 추가
-            return Response({"error": "닉네임을 입력해주세요."}, status=HTTP_400_BAD_REQUEST)
+    is_available = not User.objects.filter(**{field: value}).exists()
+    return Response({"is_available": is_available})
 
-        is_available = not User.objects.filter(nickname=nickname).exists()
-        if is_available:
-            logger.info(f"닉네임 사용 가능: {nickname}")  # 사용 가능 로그
-        else:
-            logger.info(f"닉네임 사용 불가: {nickname}")  # 사용 불가 로그
-        return Response({"is_available": is_available}, status=HTTP_200_OK)
-
-
-# ------------------------- [수정된 부분 시작] -------------------------
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -120,4 +118,3 @@ class CurrentUserView(APIView):
         user = request.user
         serializer = UserSerializer(user)
         return Response(serializer.data)
-# ------------------------- [수정된 부분 끝] -------------------------

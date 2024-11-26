@@ -1,31 +1,33 @@
 <template>
-  <div class="login-container">
-    <h1>로그인</h1>
-    <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="username">아이디</label>
-        <input
-          v-model="username"
-          id="username"
-          type="text"
-          placeholder="아이디를 입력하세요"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="password">비밀번호</label>
-        <input
-          v-model="password"
-          id="password"
-          type="password"
-          placeholder="비밀번호를 입력하세요"
-          required
-        />
-      </div>
-      <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-      <button :disabled="!isFormValid" type="submit">로그인</button>
-    </form>
-  </div>
+  <transition name="fade-slide">
+    <div class="login-container">
+      <h1>로그인</h1>
+      <form @submit.prevent="handleLogin">
+        <div class="form-group">
+          <label for="username">아이디</label>
+          <input
+            v-model="username"
+            id="username"
+            type="text"
+            placeholder="아이디를 입력하세요"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">비밀번호</label>
+          <input
+            v-model="password"
+            id="password"
+            type="password"
+            placeholder="비밀번호를 입력하세요"
+            required
+          />
+        </div>
+        <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+        <button :disabled="!isFormValid" type="submit">로그인</button>
+      </form>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -84,7 +86,7 @@ body {
   padding: 30px;
   border-radius: 10px;
   max-width: 400px;
-  margin: 100px auto; /* 중앙 정렬 */
+  margin: 250px auto; /* 중앙 정렬 */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* 그림자 효과 */
   text-align: center;
 }

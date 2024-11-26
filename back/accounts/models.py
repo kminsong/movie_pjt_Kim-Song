@@ -7,7 +7,7 @@ class User(AbstractUser):
     커스텀 유저 모델
     """
     nickname = models.CharField(max_length=50, unique=True, null=False)
-    email = models.EmailField(unique=True, null=False)
+    email = models.EmailField(unique=True, null=True, blank=True, default=None)
     favorite_genres = models.ManyToManyField(Genre, related_name="users", blank=True)
 
     def __str__(self):

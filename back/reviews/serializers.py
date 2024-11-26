@@ -36,7 +36,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         """
         try:
             movie = Movie.objects.get(tmdb_id=value)
-            return movie
+            return movie  # Movie 객체 반환
         except Movie.DoesNotExist:
             raise serializers.ValidationError("유효하지 않은 TMDB ID입니다.")
 
@@ -52,6 +52,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         """
         새 리뷰 생성
         """
-        movie = validated_data.pop('movie_id')  # movie_id를 pop하여 Movie 객체로 변환
-        validated_data['movie'] = movie
+        movie = validated_data.pop('movie_id')  # validate_movie_id에서 반환된 Movie 객체
+        validated_data['movie'] = movie  # validated_data에 Movie 객체 추가
         return super().create(validated_data)
