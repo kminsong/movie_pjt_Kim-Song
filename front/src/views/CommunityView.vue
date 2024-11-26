@@ -4,8 +4,8 @@
 
     <!-- 전체글, Hot, 게시글 작성하기 -->
     <div class="controls">
-      <button @click="goToAllPosts" :class="{ active: isAllPosts }">전체글</button>
-      <button @click="goToHotPosts" :class="{ active: isHotPosts }">Hot</button>
+      <button @click="switchToAllPosts" :class="{ active: isAllPosts }">전체글</button>
+      <button @click="switchToHotPosts" :class="{ active: isHotPosts }" class="hot-button">Hot</button>
       <button
         v-if="isAuthenticated"
         @click="goToPostForm"
@@ -50,7 +50,32 @@
       </label>
     </div>
 
-    <PostList :isHot="isHotPosts" :filter="filter" @click-post="handlePostClick" />
+    <!-- 게시글 리스트 -->
+    <PostList
+      ref="postList"
+      :isHot="isHotPosts"
+      :filter="filter"
+      @click-post="handlePostClick"
+      @update-pagination="updatePagination"
+    />
+
+    <!-- 페이지네이션 -->
+    <div v-if="totalPages > 1" class="pagination">
+      <button v-if="currentPage > 1" @click="fetchPostsByPage(1)">처음</button>
+      <button v-if="currentPage > 1" @click="fetchPostsByPage(currentPage - 1)">이전</button>
+
+      <button
+        v-for="page in paginationPages"
+        :key="page"
+        :class="{ active: currentPage === page }"
+        @click="fetchPostsByPage(page)"
+      >
+        {{ page }}
+      </button>
+
+      <button v-if="currentPage < totalPages" @click="fetchPostsByPage(currentPage + 1)">다음</button>
+      <button v-if="currentPage < totalPages" @click="fetchPostsByPage(totalPages)">마지막</button>
+    </div>
   </div>
 </template>
 
@@ -66,6 +91,8 @@ export default {
     return {
       isHotPosts: false,
       filter: "latest",
+      currentPage: 1,
+      totalPages: 1,
       isAuthenticated: false, // 로그인 상태 확인
     };
   },
@@ -73,17 +100,29 @@ export default {
     isAllPosts() {
       return !this.isHotPosts;
     },
-  },
-  created() {
-    // 로그인 상태 확인
-    this.isAuthenticated = !!localStorage.getItem("authToken");
+    paginationPages() {
+      const range = 2; // 현재 페이지를 기준으로 양쪽 2개 페이지 표시
+      const start = Math.max(1, this.currentPage - range);
+      const end = Math.min(this.totalPages, this.currentPage + range);
+      const pages = [];
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    },
   },
   methods: {
-    goToAllPosts() {
-      this.isHotPosts = false;
+    switchToAllPosts() {
+      this.isHotPosts = false; // 상태 변경
+      this.$nextTick(() => {
+        this.fetchPostsByPage(1); // 상태 변경 후 즉시 데이터 갱신
+      });
     },
-    goToHotPosts() {
-      this.isHotPosts = true;
+    switchToHotPosts() {
+      this.isHotPosts = true; // 상태 변경
+      this.$nextTick(() => {
+        this.fetchPostsByPage(1); // 상태 변경 후 즉시 데이터 갱신
+      });
     },
     goToPostForm() {
       this.$router.push({ name: "PostCreate" });
@@ -102,7 +141,20 @@ export default {
     showLoginAlert() {
       alert("로그인 후 게시글을 작성할 수 있습니다.");
     },
-    applyFilter() {},
+    applyFilter() {
+      this.fetchPostsByPage(1);
+    },
+    updatePagination(data) {
+      this.currentPage = data.currentPage;
+      this.totalPages = data.totalPages;
+    },
+    fetchPostsByPage(page) {
+      this.currentPage = page;
+      this.$refs.postList.fetchPosts(page);
+    },
+  },
+  created() {
+    this.isAuthenticated = !!localStorage.getItem("authToken");
   },
 };
 </script>
@@ -113,32 +165,56 @@ export default {
   justify-content: center;
   margin-bottom: 20px;
 }
-
 .controls button {
   margin: 0 10px;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
 }
-
+.hot-button {
+  background-color: #ff4933;
+  color: black;
+}
 .controls button.active {
   background-color: #28a745;
   color: white;
 }
-
+.controls button:hover {
+  background-color: #336eff;
+  color: white;
+}
 .filters {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
   gap: 10px;
 }
-
 .filters label {
   cursor: pointer;
 }
-
 .write-button {
   background-color: #ffc107;
   color: black;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.pagination button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: 1px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  cursor: pointer;
+}
+.pagination button.active {
+  background-color: #007bff;
+  color: white;
+}
+.pagination button:hover {
+  background-color: #0056b3;
+  color: white;
 }
 </style>

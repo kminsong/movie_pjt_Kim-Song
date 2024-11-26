@@ -6,12 +6,18 @@ from django.db.models import Count, Q
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import PageNumberPagination
 
+class CommunityPagination(PageNumberPagination):
+    page_size = 10  # 한 페이지에 보여줄 게시글 수
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class PostListCreateView(ListCreateAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = CommunityPagination  # 페이지네이션 추가
 
     def get_queryset(self):
         queryset = Post.objects.all()

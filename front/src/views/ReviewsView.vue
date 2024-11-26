@@ -3,7 +3,7 @@
     <h1>리뷰 목록</h1>
     <!-- 검색 영역 -->
     <div>
-      <input v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="performSearch"/>
+      <input v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="performSearch" />
       <select v-model="filterOption">
         <option value="title">리뷰 제목</option>
         <option value="movie_title">영화 제목</option>
@@ -19,14 +19,16 @@
     </div>
     <!-- 리뷰 목록 -->
     <div class="review-table">
+      <!-- 헤더 설정 -->
       <div class="review-header">
-        <span class="title-column">리뷰 제목</span>
-        <span class="rating-column">리뷰 평점</span>
+        <span class="title-column">제목</span>
+        <span class="rating-column">평점</span>
         <span class="movie-title-column">영화 제목</span>
         <span class="author-column">작성자</span>
         <span class="likes-column">좋아요</span>
         <span class="date-column">작성 날짜</span>
       </div>
+      <!-- 리뷰 리스트 설정 -->
       <ul>
         <li
           v-for="review in reviews"
@@ -187,8 +189,8 @@ select {
 button {
   margin-right: 10px;
   padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
+  background-color: #f1f1f1;
+  color: black;
   border: none;
   cursor: pointer;
 }
@@ -205,27 +207,32 @@ button:hover:not(:disabled) {
   margin-top: 20px;
 }
 
-.review-header,
+/* 리뷰 헤더 스타일 */
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  align-items: center;
+  font-weight: bold;
+  color: black;
+  background-color: #f1f1f1;
+  margin-left: 20px;
+}
+
+/* 리뷰 리스트 스타일 */
 .review-row {
   display: flex;
   justify-content: space-between;
   padding: 10px;
   border-bottom: 1px solid #ddd;
   align-items: center;
-}
-
-.review-header {
-  font-weight: bold;
-  background-color: #f1f1f1;
-}
-
-.review-row {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .review-row:hover {
-  background-color: #f9f9f9;
+  background-color: #336eff;
 }
 
 .title-column,
