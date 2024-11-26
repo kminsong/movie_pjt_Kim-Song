@@ -142,6 +142,10 @@
             </div>
           </div>
         </div>
+
+        <div v-if="isWaitingForResponse" class="chat-message assistant-message">
+          <p class="message-content assistant-message">...</p>
+        </div>
       </div>
       <div class="chatbot-input">
         <input
@@ -187,6 +191,7 @@ export default {
     const router = useRouter();
 
     const isChatbotOpen = ref(false);
+    const isWaitingForResponse = ref(false);
     const messages = ref([
       { role: "assistant", content: "하찮은 인간. 분석 대상 자원? 질문 허락." }
     ]);
@@ -272,7 +277,11 @@ export default {
         messages.value.push({ role: "user", content: userMessage }); // 사용자 메시지 추가
         newMessage.value = "";
 
+        isWaitingForResponse.value = true; // AI 대답을 기다리는 상태 활성화
+
         await sendToChatGPTWithTMDB(userMessage); // AI 응답 추가
+
+        isWaitingForResponse.value = false; // 대답 완료 후 상태 비활성화
         scrollToBottom(); // 스크롤 이동
       }
     };
@@ -515,10 +524,11 @@ export default {
   height: auto;
   border-radius: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .movie-poster:hover {
-  transform: scale(1.1);
+  transform: scale(1.03);
 }
 
 /* 슬라이더 컨테이너 */

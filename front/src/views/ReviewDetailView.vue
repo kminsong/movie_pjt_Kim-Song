@@ -119,11 +119,12 @@ export default {
   methods: {
     async fetchReviewDetail(reviewId) {
       try {
-        const response = await axios.get(`/reviews/${reviewId}/`, {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("authToken")}`,
-          },
-        });
+        const headers = {};
+        if (this.isAuthenticated) {
+          headers.Authorization = `Token ${localStorage.getItem("authToken")}`;
+        }
+
+        const response = await axios.get(`/reviews/${reviewId}/`, { headers });
         this.review = response.data;
         this.editedStarRating = this.review.star_rating; // 초기 별점 설정
         this.likedByUser = response.data.liked_by_user; // 서버에서 받은 liked_by_user 상태

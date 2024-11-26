@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="profile-container">
     <h1>마이페이지</h1>
     <div v-if="user">
       <p><strong>아이디:</strong> {{ user.username }}</p>
@@ -23,7 +23,7 @@
     </div>
 
     <button @click="openGenreModal">선호 장르 선택</button>
-    <button @click="editProfile">회원 정보 수정</button>
+    <button @click="openEditModal">회원 정보 수정</button>
     <button @click="confirmDeleteAccount">회원 탈퇴</button>
     <button @click="logout">로그아웃</button>
 
@@ -33,6 +33,12 @@
       @update:selectedGenres="updateSelectedGenres"
       @save="saveSelectedGenres"
       @close="closeGenreModal"
+    />
+    <ProfileEditModal
+      v-if="isEditModalOpen && user"
+      :user="user"
+      @update:user="updateUser"
+      @close="closeEditModal"
     />
     <div v-if="isDeleteConfirmModalOpen" class="delete-confirm-modal">
       <div class="modal-content">
@@ -49,15 +55,20 @@
 <script>
 import { useAuthStore } from "@/stores/authStore";
 import GenreSelectModal from "@/components/GenreSelectModal.vue";
+import ProfileEditModal from "@/components/ProfileEditModal.vue";
 import axios from "axios";
 
 export default {
   name: "ProfileView",
-  components: { GenreSelectModal },
+  components: {
+    GenreSelectModal,
+    ProfileEditModal,
+  },
   data() {
     return {
       user: null,
       isGenreModalOpen: false,
+      isEditModalOpen: false,
       isDeleteConfirmModalOpen: false,
       selectedGenres: [],
     };
@@ -88,6 +99,15 @@ export default {
     closeGenreModal() {
       this.isGenreModalOpen = false;
     },
+    openEditModal() {
+      this.isEditModalOpen = true; // 프로필 수정 모달 열기
+    },
+    closeEditModal() {
+      this.isEditModalOpen = false; // 프로필 수정 모달 닫기
+    },
+    updateUser(updatedUser) {
+      this.user = updatedUser; // 업데이트된 사용자 정보 반영
+    },
     updateSelectedGenres(newGenres) {
       this.selectedGenres = newGenres;
     },
@@ -109,9 +129,17 @@ export default {
         alert("선호 장르 업데이트에 실패했습니다. 다시 시도해주세요.");
       }
     },
-
-    editProfile() {
-      this.$router.push("/profile/edit");
+    async updateProfile(updatedUser) {
+      try {
+        const authStore = useAuthStore();
+        await authStore.updateUserProfile(updatedUser);
+        this.user = { ...this.user, ...updatedUser }; // 사용자 정보 업데이트
+        alert("회원 정보가 성공적으로 수정되었습니다.");
+        this.closeEditModal();
+      } catch (error) {
+        console.error("회원 정보 수정 중 오류 발생:", error);
+        alert("회원 정보 수정에 실패했습니다. 다시 시도해주세요.");
+      }
     },
     confirmDeleteAccount() {
       this.isDeleteConfirmModalOpen = true; // 탈퇴 확인 모달 열기
@@ -148,17 +176,39 @@ export default {
 </script>
 
 <style scoped>
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #2c2c2c; /* 슬라이더 배경 */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
 .genre-tags {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  flex-wrap: wrap; /* 버튼을 여러 줄로 배치 */
+  gap: 10px; /* 버튼 간 간격 */
+  margin-top: 10px;
 }
 
 .genre-tag {
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 5px 10px;
+  background-color: #007bff; /* 버튼 배경색 */
+  color: white; /* 버튼 텍스트 색상 */
+  border: none; /* 기본 테두리 제거 */
+  border-radius: 20px; /* 둥근 모양 */
+  padding: 8px 15px; /* 버튼 안쪽 여백 */
+  font-size: 14px; /* 글씨 크기 */
+  cursor: pointer; /* 마우스 커서를 포인터로 */
+  transition: background-color 0.3s ease; /* 호버 애니메이션 */
+}
+
+.genre-tag:hover {
+  background-color: #0056b3; /* 호버 시 배경색 */
+}
+
+.genre-tag:active {
+  background-color: #003f7f; /* 클릭 시 배경색 */
 }
 
 .delete-confirm-modal {

@@ -3,7 +3,7 @@
     <h1>리뷰 목록</h1>
     <!-- 검색 영역 -->
     <div>
-      <input v-model="searchQuery" placeholder="검색어를 입력하세요" />
+      <input v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="performSearch"/>
       <select v-model="filterOption">
         <option value="title">리뷰 제목</option>
         <option value="movie_title">영화 제목</option>

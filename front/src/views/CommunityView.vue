@@ -50,7 +50,7 @@
       </label>
     </div>
 
-    <PostList :isHot="isHotPosts" :filter="filter" />
+    <PostList :isHot="isHotPosts" :filter="filter" @click-post="handlePostClick" />
   </div>
 </template>
 
@@ -87,6 +87,17 @@ export default {
     },
     goToPostForm() {
       this.$router.push({ name: "PostCreate" });
+    },
+    redirectToLogin() {
+      alert("로그인 후 이용해주세요.");
+      this.$router.push({ name: "Login" });
+    },
+    handlePostClick(postId) {
+      if (!this.isAuthenticated) {
+        this.redirectToLogin();
+      } else {
+        this.$router.push({ name: "PostDetail", params: { id: postId } });
+      }
     },
     showLoginAlert() {
       alert("로그인 후 게시글을 작성할 수 있습니다.");

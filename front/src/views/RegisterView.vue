@@ -120,9 +120,8 @@ export default {
 
         console.log("응답 데이터:", response.data);
 
-        alert("회원가입 성공!");
-        localStorage.setItem("authToken", response.data.token);
-        this.$router.push("/");
+        alert("회원가입 성공! 로그인 페이지로 이동합니다.");
+        this.$router.push("/login"); // 로그인 페이지로 이동
       } catch (error) {
         console.error("회원가입 중 오류 발생:", error);
 

@@ -13,6 +13,7 @@
         v-model="searchQuery"
         type="text"
         placeholder="검색어를 입력하세요"
+        @keyup.enter="fetchPosts"
       />
       <!-- 검색 버튼 -->
       <button @click="fetchPosts">검색</button>
@@ -34,7 +35,7 @@
           v-for="post in posts"
           :key="post.id"
           :class="{ hot: post.is_hot }"
-          @click="goToPostDetail(post.id)"
+          @click="handlePostClick(post.id)"
         >
           <span class="title" :title="post.title">{{ truncateText(post.title, 30) }}</span>
           <span class="author">{{ post.author_name }}</span>
@@ -58,6 +59,7 @@ export default {
       posts: [], // 게시글 리스트
       searchQuery: "", // 검색어
       searchField: "title", // 검색 필드 (기본값: 제목)
+      isAuthenticated: false,
     };
   },
   methods: {
@@ -75,6 +77,14 @@ export default {
         this.posts = response.data;
       } catch (error) {
         console.error("게시글 불러오기 실패:", error);
+      }
+    },
+    handlePostClick(postId) {
+      if (!this.isAuthenticated) {
+        alert("로그인 후 이용해주세요.");
+        this.$router.push({ name: "Login" });
+      } else {
+        this.goToPostDetail(postId);
       }
     },
     goToPostDetail(postId) {
@@ -109,6 +119,7 @@ export default {
     filter: "fetchPosts",
   },
   created() {
+    this.isAuthenticated = !!localStorage.getItem("authToken");
     this.fetchPosts();
   },
 };

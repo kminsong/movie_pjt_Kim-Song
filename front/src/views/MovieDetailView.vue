@@ -80,6 +80,22 @@
       </div>
       <p v-else>리뷰가 없습니다</p>
     </div>
+
+    <div class="similar-movies-container" v-if="similarMovies.length > 0">
+      <h3>비슷한 영화 추천</h3>
+      <h6>그 영화가 마음에 든다면, 이런 영화도 좋아하겠군.</h6>
+      <div class="similar-movies">
+        <div
+          v-for="movie in similarMovies"
+          :key="movie.id"
+          class="similar-movie-card"
+          @click="goToMovieDetail(movie.id)"
+        >
+          <img :src="getPosterPath(movie.poster_path)" :alt="movie.title" />
+          <p>{{ truncateText(movie.title, 20) }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -94,6 +110,7 @@ export default {
       trailerUrl: null, // 트레일러 URL 추가
       reviews: [], // 전체 리뷰 목록
       topReviews: [], // 상위 3개 리뷰
+      similarMovies: [],
       isAuthenticated: false, // 로그인 여부
       showReviewForm: false, // 리뷰 작성 폼 표시 여부
       reviewTitle: "", // 리뷰 제목
@@ -110,6 +127,7 @@ export default {
       this.fetchMovieDetails(movieId); // 영화 상세 정보 가져오기
       this.fetchMovieTrailer(movieId); // 트레일러 가져오기
       this.fetchReviews(movieId); // 영화 리뷰 가져오기
+      this.fetchSimilarMovies(movieId);
     } else {
       console.error("영화 ID가 유효하지 않습니다.");
     }
@@ -117,6 +135,10 @@ export default {
     this.isAuthenticated = !!localStorage.getItem("authToken"); // 토큰으로 로그인 상태 확인
   },
   methods: {
+    truncateText(text, maxLength) {
+      if (!text) return ''; // text가 undefined인 경우 처리
+      return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+    },
     fetchMovieDetails(movieId) {
       tmdb
         .get(`/movie/${movieId}`, { params: { language: "ko-KR" } })
@@ -168,6 +190,24 @@ export default {
         })
         .catch((error) => {
           console.error("영어 트레일러 정보를 가져오는 중 오류 발생:", error);
+        });
+    },
+    fetchSimilarMovies(movieId) {
+      tmdb
+        .get(`/movie/${movieId}/similar`, { params: { language: "ko-KR" } })
+        .then((response) => {
+          this.similarMovies = response.data.results || [];
+          console.log("Similar Movies:", this.similarMovies); // 디버깅용
+        })
+        .catch((error) => {
+          console.error("비슷한 영화를 가져오는 중 오류 발생:", error);
+        });
+    },
+    goToMovieDetail(movieId) {
+      console.log(`Navigating to movie detail with ID: ${movieId}`);
+      this.$router.push({ name: "MovieDetail", params: { id: movieId } })
+        .catch((err) => {
+          console.error("Router navigation error:", err);
         });
     },
     goToMoviesByGenre(genreId) {
@@ -279,10 +319,54 @@ export default {
       return "★".repeat(filledStars) + halfStar + "☆".repeat(emptyStars);
     },
   },
+  watch: {
+    '$route.params.id': {
+      immediate: true,
+      handler(newId) {
+        this.fetchMovieDetails(newId);
+        this.fetchMovieTrailer(newId);
+        this.fetchReviews(newId);
+        this.fetchSimilarMovies(newId);
+      },
+    },
+  },
 };
 </script>
 
 <style scoped>
+.similar-movies-container {
+  margin: 20px 100px;
+  background: #2c2c2c;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.similar-movies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+}
+
+.similar-movie-card {
+  width: 150px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.similar-movie-card img {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.similar-movie-card p {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #eaeaea;
+}
+
 .create_bt {
   margin-right: 105px;
 }
@@ -299,13 +383,13 @@ h1 {
 }
 
 .review-container {
+  position: relative;
   align-items: flex-start;
   margin: 20px 100px; /* 무비 디테일 컨테이너와 간격 */
   background: #2c2c2c;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  position: static; /* 기본 흐름에서 movie-detail 바로 아래 배치 */
 }
 
 .review-container button {
@@ -370,7 +454,6 @@ h1 {
 .genre-button:active {
   background-color: #003f7f; /* 클릭 시 배경색 */
 }
-
 
 .clickable-genre {
   cursor: pointer;
@@ -485,4 +568,8 @@ label {
   color: gold;
 }
 
+.similar-movies-container h6 {
+  color: #c9c9c9b9;
+  margin-bottom: 20px;
+}
 </style>

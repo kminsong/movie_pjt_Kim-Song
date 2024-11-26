@@ -40,6 +40,27 @@ export const useAuthStore = defineStore("auth", {
         throw error;
       }
     },
+    async updateUserProfile(updatedUser) {
+      try {
+        const response = await axios.put(
+          "/accounts/profile/",
+          {
+            nickname: updatedUser.nickname,
+            email: updatedUser.email,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
+        this.user = response.data; // 상태 업데이트
+        return this.user;
+      } catch (error) {
+        console.error("프로필 업데이트 중 오류 발생:", error);
+        throw error;
+      }
+    },
     async updateFavoriteGenres(favoriteGenres) {
       try {
         console.log("Sending favorite genres:", favoriteGenres); // 디버그 로그
